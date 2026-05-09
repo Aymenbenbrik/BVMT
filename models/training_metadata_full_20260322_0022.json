@@ -1,0 +1,21 @@
+{
+  "run_name": "full_20260322_0022",
+  "smoke_test": false,
+  "best_val_loss": 0.6035682559013367,
+  "best_model_path": "/teamspace/studios/this_studio/models/tft_bvmt_full_20260322_0022_epoch=06_val_loss=0.6036.ckpt",
+  "epochs_trained": 12,
+  "total_params": 135646,
+  "hidden_size": 32,
+  "attention_heads": 4,
+  "batch_size": 64,
+  "learning_rate": 0.001,
+  "encoder_length": 60,
+  "prediction_length": 7,
+  "train_rows": 84648,
+  "val_rows": 10228,
+  "class_balance_up": 0.4270558037836296,
+  "class_weighted": false,
+  "stocks_used": 57,
+  "gpu_device": "gpu",
+  "precision": "bf16-mixed"
+}

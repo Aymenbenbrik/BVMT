@@ -1,0 +1,46 @@
+# requirements.txt
+# ──────────────────────────────────────────────────────────────────────
+# PURPOSE:  List all Python packages the project depends on.
+#
+# HOW TO USE:
+#   pip install -r requirements.txt
+#
+# WHY PIN VERSIONS?
+#   Pinning (e.g. pandas==2.2.0) ensures everyone on the team gets
+#   the exact same library versions, avoiding "works on my machine"
+#   bugs.  For now we use >= (minimum version) which is more flexible
+#   during early development.
+#
+# GROUPS:
+#   Core        — always needed
+#   Database    — for PostgreSQL integration (Week 2)
+#   ML          — for model training (Week 3)
+#   Web / API   — for scraping and serving (Week 5+)
+#   Testing     — for running unit tests
+# ──────────────────────────────────────────────────────────────────────
+
+# ── Core ────────────────────────────────────────────────────────────
+pandas>=2.0.0               # data manipulation (DataFrames)
+numpy>=1.24.0               # numerical computing
+# pandas-ta removed: only supports Python >=3.12. RSI is implemented
+# natively in compute_indicators.ipynb using pandas EWM (same algorithm).
+
+# ── Database ────────────────────────────────────────────────────────
+psycopg2-binary>=2.9.0      # PostgreSQL driver for Python
+asyncpg>=0.29.0             # Async PostgreSQL driver for agent pipeline
+
+# ── ML / Deep Learning (Week 3+) ───────────────────────────────────
+torch>=2.0.0               # PyTorch runtime/training
+pytorch-forecasting>=1.0   # TFT model loading/inference
+pytorch-lightning>=2.0     # lightning checkpoint compatibility
+python-dotenv>=1.0         # .env loading for DB credentials
+scikit-learn==1.3.2        # sklearn version matching tft_bvmt_best.ckpt artifact
+
+# ── Web / API (Week 5+) ────────────────────────────────────────────
+ requests>=2.31.0          # HTTP client for web scraping
+ beautifulsoup4>=4.12      # HTML parser for scraping
+ fastapi>=0.100            # web server for the platform UI
+ uvicorn>=0.23             # ASGI server to run FastAPI
+
+# ── Testing ─────────────────────────────────────────────────────────
+pytest>=7.0.0               # test runner

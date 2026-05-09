@@ -1,0 +1,2 @@
+timestamp,action,rule,eligible_rows_before,eligible_rows_after,rows_changed
+2026-03-19T06:28:39,DRY_RUN,plus_bas=0 and plus_haut=0 and cloture>0 => plus_bas=plus_haut=cloture,0,0,0

@@ -1,0 +1,7 @@
+metric,value
+rows_total,116626
+stocks_total,71
+low_gt_high,0
+close_outside_range,0
+low_high_zero_close_pos,0
+null_ohlc_rows,0

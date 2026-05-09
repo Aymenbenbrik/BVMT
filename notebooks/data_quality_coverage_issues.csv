@@ -1,0 +1,251 @@
+ticker,year,coverage_pct,days,status
+ADWYA,2023,1.5873015873015872,4,partial_year
+ADWYA,2024,0.0,0,missing_year
+ADWYA,2025,0.0,0,missing_year
+AMS,2016,0.0,0,missing_year
+AMS,2017,0.0,0,missing_year
+AMS,2018,0.0,0,missing_year
+AMS,2019,0.0,0,missing_year
+AMS,2020,0.0,0,missing_year
+AMS,2021,25.793650793650798,65,partial_year
+AMS,2022,0.0,0,missing_year
+AMS,2023,0.0,0,missing_year
+AMS,2024,0.0,0,missing_year
+AMS,2025,0.0,0,missing_year
+ASSAD,2023,0.0,0,missing_year
+ASSAD,2024,0.0,0,missing_year
+ASSAD,2025,0.0,0,missing_year
+ASSU MAGHREBIA VIE,2016,0.0,0,missing_year
+ASSU MAGHREBIA VIE,2017,0.0,0,missing_year
+ASSU MAGHREBIA VIE,2018,0.0,0,missing_year
+ASSU MAGHREBIA VIE,2019,0.0,0,missing_year
+ASSU MAGHREBIA VIE,2020,0.0,0,missing_year
+ASSU MAGHREBIA VIE,2021,0.0,0,missing_year
+ASSU MAGHREBIA VIE,2022,1.1904761904761905,3,partial_year
+ASSUR MAGHREBIA,2016,0.0,0,missing_year
+ASSUR MAGHREBIA,2017,0.0,0,missing_year
+ASSUR MAGHREBIA,2018,0.0,0,missing_year
+ASSUR MAGHREBIA,2019,0.0,0,missing_year
+ASSUR MAGHREBIA,2020,0.0,0,missing_year
+ASSUR MAGHREBIA,2022,0.0,0,missing_year
+ASSUR MAGHREBIA,2023,0.0,0,missing_year
+ASSUR MAGHREBIA,2024,0.0,0,missing_year
+ATELIER MEUBLE INT,2016,0.0,0,missing_year
+ATELIER MEUBLE INT,2017,63.49206349206349,160,partial_year
+ATTIJARI LEASING,2020,36.507936507936506,92,partial_year
+BH LEASING,2016,0.0,0,missing_year
+BH LEASING,2017,0.0,0,missing_year
+BH LEASING,2018,0.0,0,missing_year
+BH LEASING,2019,0.0,0,missing_year
+BH LEASING,2020,0.0,0,missing_year
+BH LEASING,2021,0.0,0,missing_year
+BH LEASING,2023,0.0,0,missing_year
+BH LEASING,2024,0.0,0,missing_year
+BH LEASING,2025,0.0,0,missing_year
+BNA ASSURANCES,2016,0.0,0,missing_year
+BNA ASSURANCES,2017,0.0,0,missing_year
+BNA ASSURANCES,2018,0.0,0,missing_year
+BNA ASSURANCES,2019,0.0,0,missing_year
+BNA ASSURANCES,2020,0.0,0,missing_year
+BNA ASSURANCES,2021,0.0,0,missing_year
+BNA ASSURANCES,2022,0.0,0,missing_year
+BNA ASSURANCES,2023,0.0,0,missing_year
+BNA ASSURANCES,2024,0.0,0,missing_year
+CARTHAGE CEMENT,2016,0.0,0,missing_year
+CARTHAGE CEMENT,2017,0.0,0,missing_year
+CARTHAGE CEMENT,2018,0.0,0,missing_year
+CARTHAGE CEMENT,2019,0.0,0,missing_year
+CARTHAGE CEMENT,2020,0.0,0,missing_year
+CELLCOM,2021,48.80952380952381,123,partial_year
+CELLCOM,2022,0.0,0,missing_year
+CELLCOM,2023,0.0,0,missing_year
+CELLCOM,2024,0.0,0,missing_year
+CEREALIS,2016,0.0,0,missing_year
+CEREALIS,2017,0.0,0,missing_year
+CEREALIS,2018,0.0,0,missing_year
+CEREALIS,2019,0.0,0,missing_year
+CEREALIS,2020,0.0,0,missing_year
+CEREALIS,2022,0.0,0,missing_year
+CEREALIS,2023,0.0,0,missing_year
+CEREALIS,2024,0.0,0,missing_year
+CEREALIS,2025,0.0,0,missing_year
+CIL,2016,67.06349206349206,169,partial_year
+CIL,2017,65.87301587301587,166,partial_year
+CIL,2020,49.60317460317461,125,partial_year
+CIL,2022,0.0,0,missing_year
+CIL,2023,0.0,0,missing_year
+CIL,2024,0.0,0,missing_year
+CIMENTS DE BIZERTE,2017,67.06349206349206,169,partial_year
+CIMENTS DE BIZERTE,2018,0.0,0,missing_year
+CIMENTS DE BIZERTE,2019,0.0,0,missing_year
+CIMENTS DE BIZERTE,2020,0.0,0,missing_year
+CIMENTS DE BIZERTE,2021,0.0,0,missing_year
+CIMENTS DE BIZERTE,2022,0.0,0,missing_year
+CIMENTS DE BIZERTE,2023,0.0,0,missing_year
+CIMENTS DE BIZERTE,2024,0.0,0,missing_year
+CIMENTS DE BIZERTE,2025,0.0,0,missing_year
+ELECTROSTAR,2021,48.80952380952381,123,partial_year
+ELECTROSTAR,2022,0.0,0,missing_year
+ELECTROSTAR,2023,0.0,0,missing_year
+ELECTROSTAR,2024,0.0,0,missing_year
+ELECTROSTAR,2025,0.0,0,missing_year
+ESSOUKNA,2022,0.0,0,missing_year
+ESSOUKNA,2023,0.0,0,missing_year
+ESSOUKNA,2024,0.0,0,missing_year
+GIF-FILTER,2021,48.80952380952381,123,partial_year
+GIF-FILTER,2022,0.0,0,missing_year
+GIF-FILTER,2023,0.0,0,missing_year
+GIF-FILTER,2024,0.0,0,missing_year
+GIF-FILTER,2025,0.0,0,missing_year
+HANNIBAL LEASE,2016,54.36507936507936,137,partial_year
+HANNIBAL LEASE,2017,51.98412698412699,131,partial_year
+HANNIBAL LEASE,2020,46.03174603174603,116,partial_year
+HANNIBAL LEASE,2022,0.0,0,missing_year
+HANNIBAL LEASE,2023,0.0,0,missing_year
+HANNIBAL LEASE,2024,0.0,0,missing_year
+HANNIBAL LEASE,2025,0.0,0,missing_year
+ICF,2016,0.0,0,missing_year
+ICF,2017,0.0,0,missing_year
+ICF,2018,0.0,0,missing_year
+LAND OR,2016,0.0,0,missing_year
+LAND OR,2017,0.0,0,missing_year
+LAND OR,2018,0.0,0,missing_year
+LAND OR,2019,0.0,0,missing_year
+LAND OR,2020,0.0,0,missing_year
+MAGASIN GENERAL,2016,0.0,0,missing_year
+MAGASIN GENERAL,2020,0.0,0,missing_year
+MAGASIN GENERAL,2021,0.0,0,missing_year
+MAGASIN GENERAL,2022,0.0,0,missing_year
+MAGASIN GENERAL,2023,0.0,0,missing_year
+MAGASIN GENERAL,2024,0.0,0,missing_year
+MAGASIN GENERAL,2025,0.0,0,missing_year
+MODERN LEASING,2017,63.095238095238095,159,partial_year
+MODERN LEASING,2018,0.0,0,missing_year
+MODERN LEASING,2019,0.0,0,missing_year
+MODERN LEASING,2020,0.0,0,missing_year
+MODERN LEASING,2021,0.0,0,missing_year
+MODERN LEASING,2022,0.0,0,missing_year
+MODERN LEASING,2023,0.0,0,missing_year
+MODERN LEASING,2024,0.0,0,missing_year
+MODERN LEASING,2025,0.0,0,missing_year
+MONOPRIX,2023,0.0,0,missing_year
+MONOPRIX,2024,0.0,0,missing_year
+MONOPRIX,2025,0.0,0,missing_year
+NEW BODY LINE,2016,0.0,0,missing_year
+NEW BODY LINE,2017,0.0,0,missing_year
+NEW BODY LINE,2018,0.0,0,missing_year
+NEW BODY LINE,2019,0.0,0,missing_year
+NEW BODY LINE,2020,0.0,0,missing_year
+OFFICEPLAST,2016,0.0,0,missing_year
+OFFICEPLAST,2017,0.0,0,missing_year
+OFFICEPLAST,2018,0.0,0,missing_year
+OFFICEPLAST,2019,0.0,0,missing_year
+OFFICEPLAST,2020,0.0,0,missing_year
+OFFICEPLAST,2021,0.0,0,missing_year
+OFFICEPLAST,2022,0.0,0,missing_year
+OFFICEPLAST,2023,0.0,0,missing_year
+OFFICEPLAST,2024,0.0,0,missing_year
+SERVICOM,2016,0.0,0,missing_year
+SERVICOM,2017,0.0,0,missing_year
+SERVICOM,2018,0.0,0,missing_year
+SERVICOM,2019,0.0,0,missing_year
+SERVICOM,2020,0.0,0,missing_year
+SERVICOM,2021,48.80952380952381,123,partial_year
+SERVICOM,2022,0.0,0,missing_year
+SERVICOM,2023,0.0,0,missing_year
+SERVICOM,2024,0.0,0,missing_year
+SERVICOM,2025,0.0,0,missing_year
+SIMPAR,2017,59.92063492063492,151,partial_year
+SIMPAR,2020,12.3015873015873,31,partial_year
+SIMPAR,2022,0.0,0,missing_year
+SIMPAR,2023,0.0,0,missing_year
+SIMPAR,2024,0.0,0,missing_year
+SIMPAR,2025,0.0,0,missing_year
+SITS,2019,0.0,0,missing_year
+SITS,2020,0.0,0,missing_year
+SITS,2021,0.0,0,missing_year
+SITS,2022,0.0,0,missing_year
+SITS,2023,0.0,0,missing_year
+SITS,2024,0.0,0,missing_year
+SITS,2025,0.0,0,missing_year
+SMART TUNISIE,2016,0.0,0,missing_year
+SMART TUNISIE,2017,0.0,0,missing_year
+SMART TUNISIE,2018,0.0,0,missing_year
+SMART TUNISIE,2019,0.0,0,missing_year
+SMART TUNISIE,2020,0.0,0,missing_year
+SMART TUNISIE,2021,1.984126984126984,5,partial_year
+SOMOCER,2024,0.0,0,missing_year
+SOMOCER,2025,0.0,0,missing_year
+SOPAT,2021,48.80952380952381,123,partial_year
+SOPAT,2024,0.0,0,missing_year
+SOPAT,2025,0.0,0,missing_year
+SPDIT - SICAF,2016,0.0,0,missing_year
+SPDIT - SICAF,2017,0.0,0,missing_year
+SPDIT - SICAF,2018,0.0,0,missing_year
+SPDIT - SICAF,2019,0.0,0,missing_year
+SPDIT - SICAF,2020,0.0,0,missing_year
+SPDIT - SICAF,2021,0.0,0,missing_year
+SPDIT - SICAF,2022,0.0,0,missing_year
+SPDIT - SICAF,2023,0.0,0,missing_year
+STA,2016,0.0,0,missing_year
+STA,2017,0.0,0,missing_year
+STA,2018,0.0,0,missing_year
+STA,2019,0.0,0,missing_year
+STA,2020,0.0,0,missing_year
+STA,2021,0.0,0,missing_year
+STAR,2020,0.0,0,missing_year
+STAR,2021,0.0,0,missing_year
+STAR,2022,0.0,0,missing_year
+STAR,2023,0.0,0,missing_year
+STAR,2024,0.0,0,missing_year
+TAWASOL GP HOLDING,2016,0.0,0,missing_year
+TAWASOL GP HOLDING,2017,0.0,0,missing_year
+TAWASOL GP HOLDING,2018,0.0,0,missing_year
+TAWASOL GP HOLDING,2019,0.0,0,missing_year
+TAWASOL GP HOLDING,2020,0.0,0,missing_year
+TAWASOL GP HOLDING,2021,48.80952380952381,123,partial_year
+TAWASOL GP HOLDING,2023,0.0,0,missing_year
+TAWASOL GP HOLDING,2024,0.0,0,missing_year
+TAWASOL GP HOLDING,2025,0.0,0,missing_year
+TUNIS RE,2022,0.0,0,missing_year
+TUNIS RE,2023,0.0,0,missing_year
+TUNIS RE,2025,0.0,0,missing_year
+TUNISAIR,2021,48.80952380952381,123,partial_year
+TUNISAIR,2022,0.0,0,missing_year
+TUNISAIR,2023,0.0,0,missing_year
+TUNISAIR,2024,0.0,0,missing_year
+TUNISAIR,2025,0.0,0,missing_year
+TUNISIE LEASING,2018,59.12698412698413,149,partial_year
+TUNISIE LEASING,2019,0.0,0,missing_year
+TUNISIE LEASING,2020,0.0,0,missing_year
+TUNISIE LEASING,2021,0.0,0,missing_year
+TUNISIE LEASING,2022,0.0,0,missing_year
+TUNISIE LEASING,2023,0.0,0,missing_year
+TUNISIE LEASING,2024,0.0,0,missing_year
+TUNISIE LEASING,2025,0.0,0,missing_year
+TUNISIE LEASING F,2016,0.0,0,missing_year
+TUNISIE LEASING F,2017,0.0,0,missing_year
+TUNISIE LEASING F,2018,39.682539682539684,100,partial_year
+TUNISIE LEASING F,2022,0.0,0,missing_year
+TUNISIE LEASING F,2023,0.0,0,missing_year
+TUNISIE VALEURS,2016,0.0,0,missing_year
+TUNISIE VALEURS,2017,0.0,0,missing_year
+TUNISIE VALEURS,2018,27.380952380952383,69,partial_year
+TUNISIE VALEURS,2020,35.714285714285715,90,partial_year
+TUNISIE VALEURS,2021,0.0,0,missing_year
+TUNISIE VALEURS,2022,0.0,0,missing_year
+TUNISIE VALEURS,2023,0.0,0,missing_year
+TUNISIE VALEURS,2024,0.0,0,missing_year
+TUNISIE VALEURS,2025,0.0,0,missing_year
+UADH,2021,48.80952380952381,123,partial_year
+UADH,2022,0.0,0,missing_year
+UADH,2023,0.0,0,missing_year
+UADH,2024,0.0,0,missing_year
+UADH,2025,0.0,0,missing_year
+UNIMED,2016,64.68253968253968,163,partial_year
+WIFACK INT BANK,2017,50.39682539682539,127,partial_year
+WIFACK INT BANK,2020,42.06349206349206,106,partial_year
+WIFACK INT BANK,2021,0.0,0,missing_year
+WIFACK INT BANK,2022,0.0,0,missing_year
+WIFACK INT BANK,2023,0.0,0,missing_year
+WIFACK INT BANK,2025,0.0,0,missing_year

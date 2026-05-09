@@ -1,0 +1,1 @@
+seance,isin_code,ticker,open_p,low_p,high_p,close_p,volume,flag_low_gt_high,flag_close_outside_range,flag_low_high_zero_close_pos,flag_null_ohlc

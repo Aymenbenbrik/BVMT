@@ -1,0 +1,30 @@
+{
+  "model": "CNN-LSTM-v2",
+  "test_period": "2025-01-01 to end",
+  "n_samples": 7734,
+  "accuracy": 51.2801,
+  "acc_up": 39.2246,
+  "acc_down": 62.5689,
+  "f1_macro": 0.504,
+  "f1_up": 0.4378,
+  "f1_down": 0.5702,
+  "precision_up": 0.4953,
+  "recall_up": 0.3922,
+  "precision_down": 0.5237,
+  "recall_down": 0.6257,
+  "confusion_matrix": [
+    [
+      2499,
+      1495
+    ],
+    [
+      2273,
+      1467
+    ]
+  ],
+  "inference_ms_per_sample": 0.2584,
+  "inference_total_seconds": 2.0,
+  "interpretation": "WEAK \u2014 near random baseline (50%)",
+  "val_loss_training": 0.7269,
+  "val_acc_training": 49.19
+}
