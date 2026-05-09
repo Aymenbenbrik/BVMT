@@ -116,15 +116,17 @@ Prior work (e.g., Chen et al., 2020; Krauss et al., 2017) documents this limitat
 
 \subsection{Multi-Agent Systems in Finance}
 
-Multi-agent systems have a long history in financial modeling, dating to Santa Fe Institute research in the 1990s on agent-based models of markets. Modern applications focus on LLM-based agents that generate free-text trading recommendations. Examples include systems where large language models produce narrative explanations of trading decisions.
+Two related but distinct research traditions inform this work. The first is the classical \emph{autonomous} Multi-Agent Systems (MAS) literature dating to the Santa Fe Institute agent-based market models of the 1990s \cite{ref:multi_agent}, in which heterogeneous autonomous agents trade on a shared environment, communicate, learn, and exhibit emergent collective behavior. The second is the recent wave of \emph{LLM-based} agent frameworks in which large language models generate free-text trading recommendations or play simulated roles (analyst, trader, risk officer) over natural-language messages.
 
-This work distinguishes itself through a key design choice: agents are specialized, deterministic, and produce structured outputs (numerical signals, confidence scores, feature vectors) rather than free text. This design choice enables:
+This work belongs to neither tradition. It does not claim agent autonomy, learned communication, or emergent behavior. As stated in the operational definition (Section~\ref{sec:architecture}.A), the seven components are specialized deterministic Python modules invoked by a central orchestrator; they do not exchange messages, vote, or compete. The relevant comparison is therefore with software-engineering ``ensemble pipelines'' as much as with MAS proper, and the design choices we highlight are interface-level rather than behavioral:
 \begin{itemize}
-\item \textbf{Auditability}: each agent's output can be validated against source data
-\item \textbf{Reproducibility}: deterministic agents produce identical results given identical inputs
-\item \textbf{Regulatory compliance}: numerical outputs are directly comparable to regulatory audit trails
-\item \textbf{Trust boundaries}: agents communicate through standardized AgentSignal dataclasses, enabling fine-grained failure isolation
+\item \textbf{Specialization over autonomy}: each module owns a narrow capability (technical, fundamental, sentiment, graph, explanation) instead of replicating a generalist agent.
+\item \textbf{Deterministic structured outputs}: numerical signals + calibrated confidences + explanation dictionaries replace the free text of LLM-agent frameworks, which improves auditability and reproducibility at the cost of expressivity.
+\item \textbf{Explicit trust boundaries}: communication passes through a typed \texttt{AgentSignal} dataclass; no module has direct write access to another's state.
+\item \textbf{Centralized failure isolation}: weight redistribution lives in the orchestrator (Eq.~\ref{eq:weight_redistribution}) rather than being negotiated peer-to-peer.
 \end{itemize}
+
+We therefore frame our contribution as an \emph{auditable multi-component decision pipeline} that retains the multi-agent vocabulary because the modules are interface-isolated and individually-testable, while explicitly disclaiming autonomy and emergent behavior. A reviewer interested in agent autonomy or peer-to-peer protocols will find neither in this work, and Section~\ref{sec:conclusion} lists this as a deliberate scope limitation.
 
 The orchestrator implements adaptive weighting --- agent contributions are rescaled at request time according to data-quality observations on the queried ticker (sparse news, missing recent financials, short price history) and to per-agent confidence scores. The rescaling rules are heuristic and shared across company types in the current implementation; learning of per-company-type and CV-tuned weights is described in Section~\ref{sec:weights} as Phase~2 work. This is a form of hierarchical ensemble learning with explicit trust boundaries between components.
 
@@ -168,6 +170,15 @@ Domain-specific models like bardsai/finance-sentiment-fr-base outperform general
 \section{System Architecture}\label{sec:architecture}
 
 \subsection{Multi-Agent Pipeline Overview}
+
+\textbf{Operational definition of ``agent'' used in this paper.} We use the term \emph{agent} in a deliberately narrow, software-engineering sense, distinct from the classical Multi-Agent Systems (MAS) literature. In our usage, an agent is a specialized, stateless, deterministic Python module that:
+\begin{itemize}
+    \item consumes a standardized input (the shared \texttt{AgentState});
+    \item produces a typed structured output (an \texttt{AgentSignal} or one of its subclasses) carrying a numerical signal, a calibrated confidence in $[0,1]$, an explanation dictionary, and an error flag;
+    \item exposes no peer-to-peer communication, voting, negotiation, or competitive behavior with other agents;
+    \item is invoked by a central \texttt{OrchestratorAgent} that sequences them, redistributes weights upon failure, and assembles the final decision.
+\end{itemize}
+What we therefore propose is closer to a \emph{multi-component decision pipeline with explicit trust boundaries} than to autonomous MAS in the sense of \cite{ref:multi_agent}. We retain the ``multi-agent'' nomenclature because (i) it matches the names exposed in the released code (\texttt{agents/}, \texttt{AgentState}, \texttt{OrchestratorAgent}), (ii) the auditability and failure-isolation properties we exploit are the same ones that motivated the term in software-engineering practice, and (iii) the contribution of this work is not the autonomy of agents but the structure of their interfaces. Section~\ref{sec:related}.C discusses how this design choice contrasts with autonomous MAS and LLM-based agent frameworks.
 
 The system implements a seven-agent pipeline orchestrated by a central coordinator. Figure~\ref{fig:architecture} shows the pipeline structure. Each agent operates independently, consuming standardized input and producing a structured output (AgentSignal dataclass). This design enables:
 
@@ -802,6 +813,10 @@ Key limitations should be acknowledged:
 \item \textbf{Quantile calibration}: The quantile model's 80\% prediction intervals are not yet validated against empirical coverage rates (i.e., the claim that 80\% of true returns fall within predicted intervals needs empirical confirmation).
 
 \item \textbf{Generalization}: Model training and evaluation use only BVMT data. Generalization to other emerging markets or developed markets has not been validated.
+
+\item \textbf{Coverage of the 2025 test set}: The 77.4\% headline figure is computed over 10{,}314 row-level predictions covering only 43 of the 68 tickers, because 25 tickers had no actively trading days in 2025 in the cleaned dataset. Performance on the absent 25 tickers is unknown.
+
+\item \textbf{Scope of the ``multi-agent'' claim}: The seven components are specialized deterministic modules orchestrated centrally (Section~\ref{sec:architecture}.A); they do not exchange messages, vote, negotiate, or exhibit emergent collective behavior. A reviewer interested in autonomous Multi-Agent Systems (MAS) in the Santa Fe sense, or in LLM-agent peer-to-peer frameworks, will find neither in this work. The contribution is interface-level (typed \texttt{AgentSignal}, central failure isolation, explicit trust boundaries), not behavioral. We retain the ``multi-agent'' vocabulary because it matches the released codebase, but a reader for whom that label connotes autonomy should mentally substitute ``multi-component decision pipeline''.
 \end{itemize}
 
 \subsection{Future Work}\label{sec:future_work}
