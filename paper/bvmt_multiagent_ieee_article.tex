@@ -684,6 +684,33 @@ TFT v3 (this work)              & 77.4\% & --- \\
 
 The honest comparison is therefore $+19.3$ percentage points over always-DOWN, not the often-quoted $+27.4$ pp over random. We retain the random reference for cross-paper comparability, but flag that always-DOWN is the only naive baseline a quantitative finance reviewer will accept on a thin market with structural bearish bias. Per-stock accuracy and statistical significance versus always-DOWN (McNemar test) are reported in Section~\ref{sec:experiments} once the competitive baselines from Phase~1 of the improvement plan are available.
 
+\subsection{From Quantile Forecast to Discrete Direction}\label{sec:quantile_to_direction}
+
+Because v3 predicts the conditional quantiles $\hat{Q}_{0.1}(x), \hat{Q}_{0.5}(x), \hat{Q}_{0.9}(x)$ of the seven-day fractional return rather than a class probability, every reported directional accuracy depends on a deterministic decision rule that maps these three numbers to a label in $\{\mathrm{UP}, \mathrm{DOWN}\}$. The rule actually used in the released code (\texttt{agents/technical\_agent.py}, function \texttt{interpret\_quantile\_prediction}) is the median sign:
+\begin{equation}
+\hat{d}(x) \;=\; \begin{cases}
+\mathrm{UP}   & \text{if } \hat{Q}_{0.5}(x) \geq 0, \\
+\mathrm{DOWN} & \text{otherwise.}
+\end{cases}
+\label{eq:quantile_to_direction}
+\end{equation}
+The associated confidence is read from the width of the central interval,
+\begin{equation}
+c(x) \;=\; \mathrm{clip}\!\left(1 - \frac{\hat{Q}_{0.9}(x) - \hat{Q}_{0.1}(x)}{\Delta_{\mathrm{ref}}},\; 0.05,\; 0.99\right),
+\quad \Delta_{\mathrm{ref}} = 0.10,
+\label{eq:quantile_confidence}
+\end{equation}
+with a multiplicative penalty of $0.6$ when the quantiles cross ($\hat{Q}_{0.1} > \hat{Q}_{0.9}$). The 77.4\% figure above and the lifts in Table~\ref{tab:baselines} are produced by Eq.~\eqref{eq:quantile_to_direction} on the 2025 test set.
+
+\textbf{Alternative decision rules and trade-offs.} The choice of Eq.~\eqref{eq:quantile_to_direction} is conservative for a binary metric but discards information. We list the natural alternatives so future readers can re-evaluate accuracy without re-training:
+\begin{itemize}
+\item \textit{R1 --- Median sign (this work).} $\hat{d} = \mathrm{UP}$ iff $\hat{Q}_{0.5} \geq 0$. Always emits a label; insensitive to the spread.
+\item \textit{R2 --- Strict bullish/bearish gating.} $\hat{d} = \mathrm{UP}$ iff $\hat{Q}_{0.1} > 0$, $\mathrm{DOWN}$ iff $\hat{Q}_{0.9} < 0$, otherwise abstain. Higher precision, lower coverage.
+\item \textit{R3 --- HOLD band around zero.} $\hat{d} = \mathrm{HOLD}$ iff $|\hat{Q}_{0.5}| < \tau$ for a threshold $\tau$ tuned on validation, $\mathrm{UP}/\mathrm{DOWN}$ otherwise. Trades coverage for stability, useful when transaction costs penalize low-confidence trades.
+\item \textit{R4 --- Probability via interpolated CDF.} Treat $\{(0.1, \hat{Q}_{0.1}), (0.5, \hat{Q}_{0.5}), (0.9, \hat{Q}_{0.9})\}$ as a piecewise-linear inverse CDF, recover $\hat{p}(\text{return} > 0)$, threshold at $0.5$. Equivalent to R1 when the inverse CDF is monotone but produces a graded probability for downstream calibration.
+\end{itemize}
+A row-by-row sensitivity analysis comparing R1--R4 on the 2025 test set is identified as a Phase~1 deliverable in \texttt{paper/improvement\_plan.md}; it requires re-running the saved checkpoint with predictions persisted, which is not part of the current artefact set. We disclose this gap explicitly so the 77.4\% headline figure is not misread as rule-independent.
+
 \subsection{Loss Interpretation Across Versions}
 
 The two TFT versions optimize different losses, and their numerical values in Table~\ref{tab:tft_progression} should not be compared directly.

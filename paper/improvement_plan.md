@@ -114,6 +114,28 @@ Pour répondre à C1 simultanément :
 - Test de Diebold-Mariano sur les pertes log-loss
 ```
 
+### Action 1.5b — Sensitivity de la règle quantile→direction (réponse à B1)
+
+La règle déployée (`agents/technical_agent.py`, `interpret_quantile_prediction`) est :
+
+$$
+\hat{d}(x) = \begin{cases}
+\text{UP}   & \text{si } \hat{Q}_{0.5}(x) \geq 0 \\
+\text{DOWN} & \text{sinon.}
+\end{cases}
+$$
+
+Pour chaque échantillon de test 2025, persister `(Q10, Q50, Q90, true_return_7d)`. Calculer ensuite la précision sous quatre règles concurrentes :
+
+| Règle | Définition | Couverture | Précision attendue |
+|---|---|---|---|
+| **R1** (déployée) | UP si $Q_{50} \geq 0$ | 100% | 77,4 % (référence) |
+| **R2** strict | UP si $Q_{10} > 0$, DOWN si $Q_{90} < 0$, sinon abstain | < 100% | + plus haut, - couverture |
+| **R3** HOLD band | HOLD si $|Q_{50}| < \tau$ ; $\tau$ tuné sur 2024 | < 100% | + stable sur low-confidence |
+| **R4** CDF | $\hat{p}(\text{ret}>0)$ via inverse-CDF linéaire ; seuil 0,5 | 100% | $\approx$ R1 si quantiles monotones |
+
+Reporter dans une nouvelle table `tab:rule_sensitivity` (colonnes : Rule, Coverage, Acc, F1\_UP, F1\_DOWN). Si R1 et R2/R3 divergent de plus de 5 pp sur la couverture commune, l'article doit identifier laquelle est utilisée pour le headline 77,4 %.
+
 ### Action 1.6 — Métriques économiques (réponse à C1)
 
 Sur le test set 2025, simuler une stratégie *long-short* basée sur les prédictions :
