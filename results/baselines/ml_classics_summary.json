@@ -1,0 +1,1472 @@
+{
+  "test_set": {
+    "n": 10013,
+    "n_tickers": 43,
+    "up_ratio": 0.4998
+  },
+  "models": [
+    {
+      "best_hparams": {
+        "C": 1.0
+      },
+      "val_acc": 0.5221808671159843,
+      "name": "logreg_l2",
+      "n": 10013,
+      "accuracy": 0.5288,
+      "ci95_lo": 0.5198,
+      "ci95_hi": 0.5395,
+      "confusion_matrix": {
+        "tn": 3064,
+        "fp": 1945,
+        "fn": 2773,
+        "tp": 2231
+      },
+      "per_class": {
+        "UP": {
+          "precision": 0.5342,
+          "recall": 0.4458,
+          "f1": 0.4861
+        },
+        "DOWN": {
+          "precision": 0.5249,
+          "recall": 0.6117,
+          "f1": 0.565
+        },
+        "macro_f1": 0.5255
+      },
+      "per_stock": {
+        "rows": [
+          {
+            "ticker": "CARTHAGE CEMENT",
+            "n": 234,
+            "n_up": 75,
+            "n_down": 159,
+            "accuracy": 0.6752,
+            "ci_lo": 0.6197,
+            "ci_hi": 0.735,
+            "vs_always_down": -0.0043
+          },
+          {
+            "ticker": "SOTUVER",
+            "n": 234,
+            "n_up": 101,
+            "n_down": 133,
+            "accuracy": 0.6239,
+            "ci_lo": 0.5641,
+            "ci_hi": 0.6839,
+            "vs_always_down": 0.0556
+          },
+          {
+            "ticker": "TELNET HOLDING",
+            "n": 234,
+            "n_up": 98,
+            "n_down": 136,
+            "accuracy": 0.6026,
+            "ci_lo": 0.5426,
+            "ci_hi": 0.6624,
+            "vs_always_down": 0.0214
+          },
+          {
+            "ticker": "ENNAKL AUTOMOBILES",
+            "n": 234,
+            "n_up": 124,
+            "n_down": 110,
+            "accuracy": 0.594,
+            "ci_lo": 0.5256,
+            "ci_hi": 0.6538,
+            "vs_always_down": 0.1239
+          },
+          {
+            "ticker": "BT",
+            "n": 234,
+            "n_up": 136,
+            "n_down": 98,
+            "accuracy": 0.5855,
+            "ci_lo": 0.5256,
+            "ci_hi": 0.6453,
+            "vs_always_down": 0.1667
+          },
+          {
+            "ticker": "ESSOUKNA",
+            "n": 234,
+            "n_up": 142,
+            "n_down": 92,
+            "accuracy": 0.5855,
+            "ci_lo": 0.5256,
+            "ci_hi": 0.6496,
+            "vs_always_down": 0.1923
+          },
+          {
+            "ticker": "ATELIER MEUBLE INT",
+            "n": 234,
+            "n_up": 96,
+            "n_down": 138,
+            "accuracy": 0.5812,
+            "ci_lo": 0.5171,
+            "ci_hi": 0.641,
+            "vs_always_down": -0.0085
+          },
+          {
+            "ticker": "SAH",
+            "n": 234,
+            "n_up": 142,
+            "n_down": 92,
+            "accuracy": 0.5812,
+            "ci_lo": 0.5214,
+            "ci_hi": 0.6411,
+            "vs_always_down": 0.188
+          },
+          {
+            "ticker": "SOTETEL",
+            "n": 234,
+            "n_up": 97,
+            "n_down": 137,
+            "accuracy": 0.5812,
+            "ci_lo": 0.5213,
+            "ci_hi": 0.6453,
+            "vs_always_down": -0.0043
+          },
+          {
+            "ticker": "STA",
+            "n": 234,
+            "n_up": 130,
+            "n_down": 104,
+            "accuracy": 0.5812,
+            "ci_lo": 0.5171,
+            "ci_hi": 0.6453,
+            "vs_always_down": 0.1368
+          },
+          {
+            "ticker": "MPBS",
+            "n": 234,
+            "n_up": 104,
+            "n_down": 130,
+            "accuracy": 0.5769,
+            "ci_lo": 0.5128,
+            "ci_hi": 0.6368,
+            "vs_always_down": 0.0214
+          },
+          {
+            "ticker": "CELLCOM",
+            "n": 234,
+            "n_up": 114,
+            "n_down": 120,
+            "accuracy": 0.5726,
+            "ci_lo": 0.5085,
+            "ci_hi": 0.6368,
+            "vs_always_down": 0.0598
+          },
+          {
+            "ticker": "SOTIPAPIER",
+            "n": 234,
+            "n_up": 77,
+            "n_down": 157,
+            "accuracy": 0.5684,
+            "ci_lo": 0.5043,
+            "ci_hi": 0.6282,
+            "vs_always_down": -0.1026
+          },
+          {
+            "ticker": "TPR",
+            "n": 234,
+            "n_up": 137,
+            "n_down": 97,
+            "accuracy": 0.5684,
+            "ci_lo": 0.5085,
+            "ci_hi": 0.6325,
+            "vs_always_down": 0.1538
+          },
+          {
+            "ticker": "ATB",
+            "n": 234,
+            "n_up": 145,
+            "n_down": 89,
+            "accuracy": 0.5641,
+            "ci_lo": 0.5043,
+            "ci_hi": 0.6282,
+            "vs_always_down": 0.1838
+          },
+          {
+            "ticker": "SIAME",
+            "n": 234,
+            "n_up": 93,
+            "n_down": 141,
+            "accuracy": 0.5641,
+            "ci_lo": 0.4957,
+            "ci_hi": 0.6239,
+            "vs_always_down": -0.0385
+          },
+          {
+            "ticker": "SMART TUNISIE",
+            "n": 234,
+            "n_up": 119,
+            "n_down": 115,
+            "accuracy": 0.5513,
+            "ci_lo": 0.4872,
+            "ci_hi": 0.6197,
+            "vs_always_down": 0.0598
+          },
+          {
+            "ticker": "BH BANK",
+            "n": 234,
+            "n_up": 94,
+            "n_down": 140,
+            "accuracy": 0.547,
+            "ci_lo": 0.4829,
+            "ci_hi": 0.6111,
+            "vs_always_down": -0.0513
+          },
+          {
+            "ticker": "BNA",
+            "n": 234,
+            "n_up": 138,
+            "n_down": 96,
+            "accuracy": 0.547,
+            "ci_lo": 0.4872,
+            "ci_hi": 0.6068,
+            "vs_always_down": 0.1368
+          },
+          {
+            "ticker": "POULINA GP HOLDING",
+            "n": 234,
+            "n_up": 137,
+            "n_down": 97,
+            "accuracy": 0.5427,
+            "ci_lo": 0.4786,
+            "ci_hi": 0.6068,
+            "vs_always_down": 0.1282
+          },
+          {
+            "ticker": "STB",
+            "n": 234,
+            "n_up": 123,
+            "n_down": 111,
+            "accuracy": 0.5385,
+            "ci_lo": 0.4785,
+            "ci_hi": 0.6027,
+            "vs_always_down": 0.0641
+          },
+          {
+            "ticker": "UIB",
+            "n": 234,
+            "n_up": 111,
+            "n_down": 123,
+            "accuracy": 0.5299,
+            "ci_lo": 0.4701,
+            "ci_hi": 0.5983,
+            "vs_always_down": 0.0043
+          },
+          {
+            "ticker": "ICF",
+            "n": 234,
+            "n_up": 114,
+            "n_down": 120,
+            "accuracy": 0.5256,
+            "ci_lo": 0.4615,
+            "ci_hi": 0.5897,
+            "vs_always_down": 0.0128
+          },
+          {
+            "ticker": "SOTRAPIL",
+            "n": 234,
+            "n_up": 140,
+            "n_down": 94,
+            "accuracy": 0.5171,
+            "ci_lo": 0.453,
+            "ci_hi": 0.5855,
+            "vs_always_down": 0.1154
+          },
+          {
+            "ticker": "STAR",
+            "n": 185,
+            "n_up": 72,
+            "n_down": 113,
+            "accuracy": 0.5135,
+            "ci_lo": 0.4432,
+            "ci_hi": 0.5838,
+            "vs_always_down": -0.0973
+          },
+          {
+            "ticker": "EURO-CYCLES",
+            "n": 234,
+            "n_up": 108,
+            "n_down": 126,
+            "accuracy": 0.5128,
+            "ci_lo": 0.453,
+            "ci_hi": 0.5769,
+            "vs_always_down": -0.0256
+          },
+          {
+            "ticker": "ATL",
+            "n": 234,
+            "n_up": 118,
+            "n_down": 116,
+            "accuracy": 0.5043,
+            "ci_lo": 0.4359,
+            "ci_hi": 0.5684,
+            "vs_always_down": 0.0085
+          },
+          {
+            "ticker": "DELICE HOLDING",
+            "n": 234,
+            "n_up": 134,
+            "n_down": 100,
+            "accuracy": 0.5043,
+            "ci_lo": 0.4359,
+            "ci_hi": 0.5684,
+            "vs_always_down": 0.0769
+          },
+          {
+            "ticker": "NEW BODY LINE",
+            "n": 234,
+            "n_up": 87,
+            "n_down": 147,
+            "accuracy": 0.5043,
+            "ci_lo": 0.4402,
+            "ci_hi": 0.5684,
+            "vs_always_down": -0.1239
+          },
+          {
+            "ticker": "SOTUMAG",
+            "n": 234,
+            "n_up": 128,
+            "n_down": 106,
+            "accuracy": 0.5,
+            "ci_lo": 0.4359,
+            "ci_hi": 0.5684,
+            "vs_always_down": 0.047
+          },
+          {
+            "ticker": "LAND OR",
+            "n": 234,
+            "n_up": 124,
+            "n_down": 110,
+            "accuracy": 0.4915,
+            "ci_lo": 0.4274,
+            "ci_hi": 0.5598,
+            "vs_always_down": 0.0214
+          },
+          {
+            "ticker": "ASSU MAGHREBIA VIE",
+            "n": 234,
+            "n_up": 99,
+            "n_down": 135,
+            "accuracy": 0.4872,
+            "ci_lo": 0.4188,
+            "ci_hi": 0.5514,
+            "vs_always_down": -0.0897
+          },
+          {
+            "ticker": "ATTIJARI LEASING",
+            "n": 234,
+            "n_up": 123,
+            "n_down": 111,
+            "accuracy": 0.4872,
+            "ci_lo": 0.4274,
+            "ci_hi": 0.547,
+            "vs_always_down": 0.0128
+          },
+          {
+            "ticker": "TUNISIE LEASING F",
+            "n": 234,
+            "n_up": 129,
+            "n_down": 105,
+            "accuracy": 0.4872,
+            "ci_lo": 0.4272,
+            "ci_hi": 0.5556,
+            "vs_always_down": 0.0385
+          },
+          {
+            "ticker": "UNIMED",
+            "n": 234,
+            "n_up": 119,
+            "n_down": 115,
+            "accuracy": 0.4872,
+            "ci_lo": 0.4187,
+            "ci_hi": 0.547,
+            "vs_always_down": -0.0043
+          },
+          {
+            "ticker": "ATTIJARI BANK",
+            "n": 234,
+            "n_up": 115,
+            "n_down": 119,
+            "accuracy": 0.4829,
+            "ci_lo": 0.423,
+            "ci_hi": 0.547,
+            "vs_always_down": -0.0256
+          },
+          {
+            "ticker": "SFBT",
+            "n": 234,
+            "n_up": 113,
+            "n_down": 121,
+            "accuracy": 0.4829,
+            "ci_lo": 0.4188,
+            "ci_hi": 0.547,
+            "vs_always_down": -0.0342
+          },
+          {
+            "ticker": "AMEN BANK",
+            "n": 234,
+            "n_up": 125,
+            "n_down": 109,
+            "accuracy": 0.4701,
+            "ci_lo": 0.4059,
+            "ci_hi": 0.5342,
+            "vs_always_down": 0.0043
+          },
+          {
+            "ticker": "CIL",
+            "n": 234,
+            "n_up": 119,
+            "n_down": 115,
+            "accuracy": 0.4701,
+            "ci_lo": 0.4017,
+            "ci_hi": 0.5342,
+            "vs_always_down": -0.0214
+          },
+          {
+            "ticker": "ONE TECH HOLDING",
+            "n": 234,
+            "n_up": 102,
+            "n_down": 132,
+            "accuracy": 0.4573,
+            "ci_lo": 0.3973,
+            "ci_hi": 0.5214,
+            "vs_always_down": -0.1068
+          },
+          {
+            "ticker": "ARTES",
+            "n": 234,
+            "n_up": 131,
+            "n_down": 103,
+            "accuracy": 0.4402,
+            "ci_lo": 0.3761,
+            "ci_hi": 0.5043,
+            "vs_always_down": 0.0
+          },
+          {
+            "ticker": "CITY CARS",
+            "n": 234,
+            "n_up": 143,
+            "n_down": 91,
+            "accuracy": 0.406,
+            "ci_lo": 0.3419,
+            "ci_hi": 0.4701,
+            "vs_always_down": 0.0171
+          },
+          {
+            "ticker": "BIAT",
+            "n": 234,
+            "n_up": 128,
+            "n_down": 106,
+            "accuracy": 0.3419,
+            "ci_lo": 0.2862,
+            "ci_hi": 0.4017,
+            "vs_always_down": -0.1111
+          }
+        ],
+        "spread": {
+          "mean": 0.5287,
+          "median": 0.5299,
+          "std": 0.0607,
+          "q1": 0.4872,
+          "q3": 0.5747,
+          "min": 0.3419,
+          "max": 0.6752,
+          "n_tickers": 43,
+          "frac_below_50": 0.3023,
+          "frac_below_581": 0.7674,
+          "frac_above_77_4": 0.0
+        }
+      }
+    },
+    {
+      "best_hparams": {
+        "max_depth": "None",
+        "n_estimators": 200
+      },
+      "val_acc": 0.5367669248566542,
+      "name": "random_forest",
+      "n": 10013,
+      "accuracy": 0.5062,
+      "ci95_lo": 0.4961,
+      "ci95_hi": 0.5156,
+      "confusion_matrix": {
+        "tn": 4093,
+        "fp": 916,
+        "fn": 4028,
+        "tp": 976
+      },
+      "per_class": {
+        "UP": {
+          "precision": 0.5159,
+          "recall": 0.195,
+          "f1": 0.2831
+        },
+        "DOWN": {
+          "precision": 0.504,
+          "recall": 0.8171,
+          "f1": 0.6235
+        },
+        "macro_f1": 0.4533
+      },
+      "per_stock": {
+        "rows": [
+          {
+            "ticker": "CARTHAGE CEMENT",
+            "n": 234,
+            "n_up": 75,
+            "n_down": 159,
+            "accuracy": 0.6795,
+            "ci_lo": 0.6239,
+            "ci_hi": 0.7351,
+            "vs_always_down": 0.0
+          },
+          {
+            "ticker": "SOTIPAPIER",
+            "n": 234,
+            "n_up": 77,
+            "n_down": 157,
+            "accuracy": 0.6624,
+            "ci_lo": 0.6026,
+            "ci_hi": 0.7222,
+            "vs_always_down": -0.0085
+          },
+          {
+            "ticker": "STAR",
+            "n": 185,
+            "n_up": 72,
+            "n_down": 113,
+            "accuracy": 0.6162,
+            "ci_lo": 0.5458,
+            "ci_hi": 0.6865,
+            "vs_always_down": 0.0054
+          },
+          {
+            "ticker": "NEW BODY LINE",
+            "n": 234,
+            "n_up": 87,
+            "n_down": 147,
+            "accuracy": 0.6154,
+            "ci_lo": 0.5556,
+            "ci_hi": 0.6752,
+            "vs_always_down": -0.0128
+          },
+          {
+            "ticker": "SIAME",
+            "n": 234,
+            "n_up": 93,
+            "n_down": 141,
+            "accuracy": 0.6068,
+            "ci_lo": 0.547,
+            "ci_hi": 0.6709,
+            "vs_always_down": 0.0043
+          },
+          {
+            "ticker": "TELNET HOLDING",
+            "n": 234,
+            "n_up": 98,
+            "n_down": 136,
+            "accuracy": 0.6026,
+            "ci_lo": 0.5385,
+            "ci_hi": 0.6667,
+            "vs_always_down": 0.0214
+          },
+          {
+            "ticker": "SOTETEL",
+            "n": 234,
+            "n_up": 97,
+            "n_down": 137,
+            "accuracy": 0.5855,
+            "ci_lo": 0.5171,
+            "ci_hi": 0.6496,
+            "vs_always_down": 0.0
+          },
+          {
+            "ticker": "ATELIER MEUBLE INT",
+            "n": 234,
+            "n_up": 96,
+            "n_down": 138,
+            "accuracy": 0.5812,
+            "ci_lo": 0.5214,
+            "ci_hi": 0.641,
+            "vs_always_down": -0.0085
+          },
+          {
+            "ticker": "ASSU MAGHREBIA VIE",
+            "n": 234,
+            "n_up": 99,
+            "n_down": 135,
+            "accuracy": 0.5769,
+            "ci_lo": 0.517,
+            "ci_hi": 0.641,
+            "vs_always_down": 0.0
+          },
+          {
+            "ticker": "BT",
+            "n": 234,
+            "n_up": 136,
+            "n_down": 98,
+            "accuracy": 0.5769,
+            "ci_lo": 0.5128,
+            "ci_hi": 0.6325,
+            "vs_always_down": 0.1581
+          },
+          {
+            "ticker": "SOTUVER",
+            "n": 234,
+            "n_up": 101,
+            "n_down": 133,
+            "accuracy": 0.5684,
+            "ci_lo": 0.5085,
+            "ci_hi": 0.6282,
+            "vs_always_down": 0.0
+          },
+          {
+            "ticker": "EURO-CYCLES",
+            "n": 234,
+            "n_up": 108,
+            "n_down": 126,
+            "accuracy": 0.5556,
+            "ci_lo": 0.4915,
+            "ci_hi": 0.6154,
+            "vs_always_down": 0.0171
+          },
+          {
+            "ticker": "ENNAKL AUTOMOBILES",
+            "n": 234,
+            "n_up": 124,
+            "n_down": 110,
+            "accuracy": 0.5427,
+            "ci_lo": 0.4786,
+            "ci_hi": 0.6111,
+            "vs_always_down": 0.0726
+          },
+          {
+            "ticker": "MPBS",
+            "n": 234,
+            "n_up": 104,
+            "n_down": 130,
+            "accuracy": 0.5427,
+            "ci_lo": 0.4829,
+            "ci_hi": 0.6026,
+            "vs_always_down": -0.0128
+          },
+          {
+            "ticker": "UIB",
+            "n": 234,
+            "n_up": 111,
+            "n_down": 123,
+            "accuracy": 0.5385,
+            "ci_lo": 0.4744,
+            "ci_hi": 0.6026,
+            "vs_always_down": 0.0128
+          },
+          {
+            "ticker": "CELLCOM",
+            "n": 234,
+            "n_up": 114,
+            "n_down": 120,
+            "accuracy": 0.5342,
+            "ci_lo": 0.4744,
+            "ci_hi": 0.5983,
+            "vs_always_down": 0.0214
+          },
+          {
+            "ticker": "SMART TUNISIE",
+            "n": 234,
+            "n_up": 119,
+            "n_down": 115,
+            "accuracy": 0.5342,
+            "ci_lo": 0.4658,
+            "ci_hi": 0.5983,
+            "vs_always_down": 0.0427
+          },
+          {
+            "ticker": "STB",
+            "n": 234,
+            "n_up": 123,
+            "n_down": 111,
+            "accuracy": 0.5299,
+            "ci_lo": 0.4658,
+            "ci_hi": 0.5897,
+            "vs_always_down": 0.0556
+          },
+          {
+            "ticker": "BH BANK",
+            "n": 234,
+            "n_up": 94,
+            "n_down": 140,
+            "accuracy": 0.5171,
+            "ci_lo": 0.4573,
+            "ci_hi": 0.5855,
+            "vs_always_down": -0.0812
+          },
+          {
+            "ticker": "CIL",
+            "n": 234,
+            "n_up": 119,
+            "n_down": 115,
+            "accuracy": 0.5085,
+            "ci_lo": 0.4444,
+            "ci_hi": 0.5726,
+            "vs_always_down": 0.0171
+          },
+          {
+            "ticker": "ATL",
+            "n": 234,
+            "n_up": 118,
+            "n_down": 116,
+            "accuracy": 0.4957,
+            "ci_lo": 0.4274,
+            "ci_hi": 0.5598,
+            "vs_always_down": 0.0
+          },
+          {
+            "ticker": "ATTIJARI BANK",
+            "n": 234,
+            "n_up": 115,
+            "n_down": 119,
+            "accuracy": 0.4915,
+            "ci_lo": 0.4316,
+            "ci_hi": 0.5556,
+            "vs_always_down": -0.0171
+          },
+          {
+            "ticker": "ICF",
+            "n": 234,
+            "n_up": 114,
+            "n_down": 120,
+            "accuracy": 0.4915,
+            "ci_lo": 0.4231,
+            "ci_hi": 0.5513,
+            "vs_always_down": -0.0214
+          },
+          {
+            "ticker": "POULINA GP HOLDING",
+            "n": 234,
+            "n_up": 137,
+            "n_down": 97,
+            "accuracy": 0.4872,
+            "ci_lo": 0.4188,
+            "ci_hi": 0.547,
+            "vs_always_down": 0.0726
+          },
+          {
+            "ticker": "SFBT",
+            "n": 234,
+            "n_up": 113,
+            "n_down": 121,
+            "accuracy": 0.4829,
+            "ci_lo": 0.423,
+            "ci_hi": 0.547,
+            "vs_always_down": -0.0342
+          },
+          {
+            "ticker": "ONE TECH HOLDING",
+            "n": 234,
+            "n_up": 102,
+            "n_down": 132,
+            "accuracy": 0.4786,
+            "ci_lo": 0.4188,
+            "ci_hi": 0.547,
+            "vs_always_down": -0.0855
+          },
+          {
+            "ticker": "AMEN BANK",
+            "n": 234,
+            "n_up": 125,
+            "n_down": 109,
+            "accuracy": 0.4744,
+            "ci_lo": 0.4103,
+            "ci_hi": 0.5385,
+            "vs_always_down": 0.0085
+          },
+          {
+            "ticker": "ATTIJARI LEASING",
+            "n": 234,
+            "n_up": 123,
+            "n_down": 111,
+            "accuracy": 0.4744,
+            "ci_lo": 0.4145,
+            "ci_hi": 0.5342,
+            "vs_always_down": 0.0
+          },
+          {
+            "ticker": "LAND OR",
+            "n": 234,
+            "n_up": 124,
+            "n_down": 110,
+            "accuracy": 0.4701,
+            "ci_lo": 0.406,
+            "ci_hi": 0.5385,
+            "vs_always_down": 0.0
+          },
+          {
+            "ticker": "DELICE HOLDING",
+            "n": 234,
+            "n_up": 134,
+            "n_down": 100,
+            "accuracy": 0.4615,
+            "ci_lo": 0.3931,
+            "ci_hi": 0.5256,
+            "vs_always_down": 0.0342
+          },
+          {
+            "ticker": "STA",
+            "n": 234,
+            "n_up": 130,
+            "n_down": 104,
+            "accuracy": 0.4615,
+            "ci_lo": 0.3974,
+            "ci_hi": 0.5256,
+            "vs_always_down": 0.0171
+          },
+          {
+            "ticker": "CITY CARS",
+            "n": 234,
+            "n_up": 143,
+            "n_down": 91,
+            "accuracy": 0.453,
+            "ci_lo": 0.3846,
+            "ci_hi": 0.5171,
+            "vs_always_down": 0.0641
+          },
+          {
+            "ticker": "ARTES",
+            "n": 234,
+            "n_up": 131,
+            "n_down": 103,
+            "accuracy": 0.4402,
+            "ci_lo": 0.3802,
+            "ci_hi": 0.5044,
+            "vs_always_down": 0.0
+          },
+          {
+            "ticker": "SAH",
+            "n": 234,
+            "n_up": 142,
+            "n_down": 92,
+            "accuracy": 0.4402,
+            "ci_lo": 0.3802,
+            "ci_hi": 0.5043,
+            "vs_always_down": 0.047
+          },
+          {
+            "ticker": "UNIMED",
+            "n": 234,
+            "n_up": 119,
+            "n_down": 115,
+            "accuracy": 0.4359,
+            "ci_lo": 0.3718,
+            "ci_hi": 0.5043,
+            "vs_always_down": -0.0556
+          },
+          {
+            "ticker": "BNA",
+            "n": 234,
+            "n_up": 138,
+            "n_down": 96,
+            "accuracy": 0.4316,
+            "ci_lo": 0.3718,
+            "ci_hi": 0.4915,
+            "vs_always_down": 0.0214
+          },
+          {
+            "ticker": "SOTUMAG",
+            "n": 234,
+            "n_up": 128,
+            "n_down": 106,
+            "accuracy": 0.4316,
+            "ci_lo": 0.3675,
+            "ci_hi": 0.4957,
+            "vs_always_down": -0.0214
+          },
+          {
+            "ticker": "TPR",
+            "n": 234,
+            "n_up": 137,
+            "n_down": 97,
+            "accuracy": 0.4274,
+            "ci_lo": 0.3717,
+            "ci_hi": 0.4915,
+            "vs_always_down": 0.0128
+          },
+          {
+            "ticker": "TUNISIE LEASING F",
+            "n": 234,
+            "n_up": 129,
+            "n_down": 105,
+            "accuracy": 0.4231,
+            "ci_lo": 0.3632,
+            "ci_hi": 0.4915,
+            "vs_always_down": -0.0256
+          },
+          {
+            "ticker": "BIAT",
+            "n": 234,
+            "n_up": 128,
+            "n_down": 106,
+            "accuracy": 0.4188,
+            "ci_lo": 0.359,
+            "ci_hi": 0.4829,
+            "vs_always_down": -0.0342
+          },
+          {
+            "ticker": "SOTRAPIL",
+            "n": 234,
+            "n_up": 140,
+            "n_down": 94,
+            "accuracy": 0.406,
+            "ci_lo": 0.3419,
+            "ci_hi": 0.4701,
+            "vs_always_down": 0.0043
+          },
+          {
+            "ticker": "ATB",
+            "n": 234,
+            "n_up": 145,
+            "n_down": 89,
+            "accuracy": 0.3889,
+            "ci_lo": 0.3291,
+            "ci_hi": 0.4488,
+            "vs_always_down": 0.0085
+          },
+          {
+            "ticker": "ESSOUKNA",
+            "n": 234,
+            "n_up": 142,
+            "n_down": 92,
+            "accuracy": 0.3504,
+            "ci_lo": 0.2906,
+            "ci_hi": 0.4103,
+            "vs_always_down": -0.0427
+          }
+        ],
+        "spread": {
+          "mean": 0.5068,
+          "median": 0.4915,
+          "std": 0.0753,
+          "q1": 0.4466,
+          "q3": 0.562,
+          "min": 0.3504,
+          "max": 0.6795,
+          "n_tickers": 43,
+          "frac_below_50": 0.5349,
+          "frac_below_581": 0.814,
+          "frac_above_77_4": 0.0
+        }
+      }
+    },
+    {
+      "best_hparams": {
+        "n_estimators": 400,
+        "max_depth": 6,
+        "lr": 0.05
+      },
+      "val_acc": 0.5285182577205513,
+      "name": "xgboost_technical",
+      "n": 10013,
+      "accuracy": 0.5163,
+      "ci95_lo": 0.5061,
+      "ci95_hi": 0.5256,
+      "confusion_matrix": {
+        "tn": 3222,
+        "fp": 1787,
+        "fn": 3056,
+        "tp": 1948
+      },
+      "per_class": {
+        "UP": {
+          "precision": 0.5216,
+          "recall": 0.3893,
+          "f1": 0.4458
+        },
+        "DOWN": {
+          "precision": 0.5132,
+          "recall": 0.6432,
+          "f1": 0.5709
+        },
+        "macro_f1": 0.5083
+      },
+      "per_stock": {
+        "rows": [
+          {
+            "ticker": "CARTHAGE CEMENT",
+            "n": 234,
+            "n_up": 75,
+            "n_down": 159,
+            "accuracy": 0.6026,
+            "ci_lo": 0.5385,
+            "ci_hi": 0.6581,
+            "vs_always_down": -0.0769
+          },
+          {
+            "ticker": "CELLCOM",
+            "n": 234,
+            "n_up": 114,
+            "n_down": 120,
+            "accuracy": 0.594,
+            "ci_lo": 0.5299,
+            "ci_hi": 0.6581,
+            "vs_always_down": 0.0812
+          },
+          {
+            "ticker": "ATELIER MEUBLE INT",
+            "n": 234,
+            "n_up": 96,
+            "n_down": 138,
+            "accuracy": 0.5897,
+            "ci_lo": 0.5256,
+            "ci_hi": 0.6496,
+            "vs_always_down": 0.0
+          },
+          {
+            "ticker": "STAR",
+            "n": 185,
+            "n_up": 72,
+            "n_down": 113,
+            "accuracy": 0.5892,
+            "ci_lo": 0.5135,
+            "ci_hi": 0.6595,
+            "vs_always_down": -0.0216
+          },
+          {
+            "ticker": "SOTETEL",
+            "n": 234,
+            "n_up": 97,
+            "n_down": 137,
+            "accuracy": 0.5855,
+            "ci_lo": 0.5171,
+            "ci_hi": 0.6496,
+            "vs_always_down": 0.0
+          },
+          {
+            "ticker": "TELNET HOLDING",
+            "n": 234,
+            "n_up": 98,
+            "n_down": 136,
+            "accuracy": 0.5812,
+            "ci_lo": 0.5171,
+            "ci_hi": 0.641,
+            "vs_always_down": 0.0
+          },
+          {
+            "ticker": "SOTUVER",
+            "n": 234,
+            "n_up": 101,
+            "n_down": 133,
+            "accuracy": 0.5726,
+            "ci_lo": 0.5043,
+            "ci_hi": 0.6368,
+            "vs_always_down": 0.0043
+          },
+          {
+            "ticker": "CITY CARS",
+            "n": 234,
+            "n_up": 143,
+            "n_down": 91,
+            "accuracy": 0.5684,
+            "ci_lo": 0.5,
+            "ci_hi": 0.6325,
+            "vs_always_down": 0.1795
+          },
+          {
+            "ticker": "NEW BODY LINE",
+            "n": 234,
+            "n_up": 87,
+            "n_down": 147,
+            "accuracy": 0.5598,
+            "ci_lo": 0.4957,
+            "ci_hi": 0.6239,
+            "vs_always_down": -0.0684
+          },
+          {
+            "ticker": "POULINA GP HOLDING",
+            "n": 234,
+            "n_up": 137,
+            "n_down": 97,
+            "accuracy": 0.5598,
+            "ci_lo": 0.4915,
+            "ci_hi": 0.6239,
+            "vs_always_down": 0.1453
+          },
+          {
+            "ticker": "MPBS",
+            "n": 234,
+            "n_up": 104,
+            "n_down": 130,
+            "accuracy": 0.5556,
+            "ci_lo": 0.4957,
+            "ci_hi": 0.6154,
+            "vs_always_down": 0.0
+          },
+          {
+            "ticker": "ASSU MAGHREBIA VIE",
+            "n": 234,
+            "n_up": 99,
+            "n_down": 135,
+            "accuracy": 0.5513,
+            "ci_lo": 0.4872,
+            "ci_hi": 0.6154,
+            "vs_always_down": -0.0256
+          },
+          {
+            "ticker": "BH BANK",
+            "n": 234,
+            "n_up": 94,
+            "n_down": 140,
+            "accuracy": 0.5513,
+            "ci_lo": 0.4872,
+            "ci_hi": 0.6154,
+            "vs_always_down": -0.047
+          },
+          {
+            "ticker": "BT",
+            "n": 234,
+            "n_up": 136,
+            "n_down": 98,
+            "accuracy": 0.547,
+            "ci_lo": 0.4829,
+            "ci_hi": 0.6111,
+            "vs_always_down": 0.1282
+          },
+          {
+            "ticker": "DELICE HOLDING",
+            "n": 234,
+            "n_up": 134,
+            "n_down": 100,
+            "accuracy": 0.5427,
+            "ci_lo": 0.4786,
+            "ci_hi": 0.6111,
+            "vs_always_down": 0.1154
+          },
+          {
+            "ticker": "EURO-CYCLES",
+            "n": 234,
+            "n_up": 108,
+            "n_down": 126,
+            "accuracy": 0.5342,
+            "ci_lo": 0.4743,
+            "ci_hi": 0.5983,
+            "vs_always_down": -0.0043
+          },
+          {
+            "ticker": "SAH",
+            "n": 234,
+            "n_up": 142,
+            "n_down": 92,
+            "accuracy": 0.5299,
+            "ci_lo": 0.4701,
+            "ci_hi": 0.5941,
+            "vs_always_down": 0.1368
+          },
+          {
+            "ticker": "STB",
+            "n": 234,
+            "n_up": 123,
+            "n_down": 111,
+            "accuracy": 0.5299,
+            "ci_lo": 0.47,
+            "ci_hi": 0.594,
+            "vs_always_down": 0.0556
+          },
+          {
+            "ticker": "ICF",
+            "n": 234,
+            "n_up": 114,
+            "n_down": 120,
+            "accuracy": 0.5256,
+            "ci_lo": 0.4658,
+            "ci_hi": 0.5897,
+            "vs_always_down": 0.0128
+          },
+          {
+            "ticker": "STA",
+            "n": 234,
+            "n_up": 130,
+            "n_down": 104,
+            "accuracy": 0.5214,
+            "ci_lo": 0.4614,
+            "ci_hi": 0.5855,
+            "vs_always_down": 0.0769
+          },
+          {
+            "ticker": "UIB",
+            "n": 234,
+            "n_up": 111,
+            "n_down": 123,
+            "accuracy": 0.5214,
+            "ci_lo": 0.4615,
+            "ci_hi": 0.5813,
+            "vs_always_down": -0.0043
+          },
+          {
+            "ticker": "UNIMED",
+            "n": 234,
+            "n_up": 119,
+            "n_down": 115,
+            "accuracy": 0.5214,
+            "ci_lo": 0.453,
+            "ci_hi": 0.5855,
+            "vs_always_down": 0.0299
+          },
+          {
+            "ticker": "ENNAKL AUTOMOBILES",
+            "n": 234,
+            "n_up": 124,
+            "n_down": 110,
+            "accuracy": 0.5171,
+            "ci_lo": 0.4529,
+            "ci_hi": 0.5812,
+            "vs_always_down": 0.047
+          },
+          {
+            "ticker": "ATTIJARI BANK",
+            "n": 234,
+            "n_up": 115,
+            "n_down": 119,
+            "accuracy": 0.5085,
+            "ci_lo": 0.4487,
+            "ci_hi": 0.5684,
+            "vs_always_down": 0.0
+          },
+          {
+            "ticker": "SMART TUNISIE",
+            "n": 234,
+            "n_up": 119,
+            "n_down": 115,
+            "accuracy": 0.5043,
+            "ci_lo": 0.4402,
+            "ci_hi": 0.5684,
+            "vs_always_down": 0.0128
+          },
+          {
+            "ticker": "BIAT",
+            "n": 234,
+            "n_up": 128,
+            "n_down": 106,
+            "accuracy": 0.5,
+            "ci_lo": 0.4316,
+            "ci_hi": 0.5641,
+            "vs_always_down": 0.047
+          },
+          {
+            "ticker": "ATL",
+            "n": 234,
+            "n_up": 118,
+            "n_down": 116,
+            "accuracy": 0.4957,
+            "ci_lo": 0.4274,
+            "ci_hi": 0.5598,
+            "vs_always_down": 0.0
+          },
+          {
+            "ticker": "CIL",
+            "n": 234,
+            "n_up": 119,
+            "n_down": 115,
+            "accuracy": 0.4915,
+            "ci_lo": 0.4231,
+            "ci_hi": 0.5514,
+            "vs_always_down": 0.0
+          },
+          {
+            "ticker": "BNA",
+            "n": 234,
+            "n_up": 138,
+            "n_down": 96,
+            "accuracy": 0.4829,
+            "ci_lo": 0.4188,
+            "ci_hi": 0.5427,
+            "vs_always_down": 0.0726
+          },
+          {
+            "ticker": "ONE TECH HOLDING",
+            "n": 234,
+            "n_up": 102,
+            "n_down": 132,
+            "accuracy": 0.4829,
+            "ci_lo": 0.4145,
+            "ci_hi": 0.5471,
+            "vs_always_down": -0.0812
+          },
+          {
+            "ticker": "SFBT",
+            "n": 234,
+            "n_up": 113,
+            "n_down": 121,
+            "accuracy": 0.4829,
+            "ci_lo": 0.423,
+            "ci_hi": 0.547,
+            "vs_always_down": -0.0342
+          },
+          {
+            "ticker": "AMEN BANK",
+            "n": 234,
+            "n_up": 125,
+            "n_down": 109,
+            "accuracy": 0.4786,
+            "ci_lo": 0.4103,
+            "ci_hi": 0.547,
+            "vs_always_down": 0.0128
+          },
+          {
+            "ticker": "ATTIJARI LEASING",
+            "n": 234,
+            "n_up": 123,
+            "n_down": 111,
+            "accuracy": 0.4786,
+            "ci_lo": 0.4188,
+            "ci_hi": 0.5427,
+            "vs_always_down": 0.0043
+          },
+          {
+            "ticker": "LAND OR",
+            "n": 234,
+            "n_up": 124,
+            "n_down": 110,
+            "accuracy": 0.4744,
+            "ci_lo": 0.4103,
+            "ci_hi": 0.5386,
+            "vs_always_down": 0.0043
+          },
+          {
+            "ticker": "ATB",
+            "n": 234,
+            "n_up": 145,
+            "n_down": 89,
+            "accuracy": 0.4701,
+            "ci_lo": 0.406,
+            "ci_hi": 0.5385,
+            "vs_always_down": 0.0897
+          },
+          {
+            "ticker": "ESSOUKNA",
+            "n": 234,
+            "n_up": 142,
+            "n_down": 92,
+            "accuracy": 0.4701,
+            "ci_lo": 0.406,
+            "ci_hi": 0.5299,
+            "vs_always_down": 0.0769
+          },
+          {
+            "ticker": "SIAME",
+            "n": 234,
+            "n_up": 93,
+            "n_down": 141,
+            "accuracy": 0.4658,
+            "ci_lo": 0.4017,
+            "ci_hi": 0.5299,
+            "vs_always_down": -0.1368
+          },
+          {
+            "ticker": "SOTIPAPIER",
+            "n": 234,
+            "n_up": 77,
+            "n_down": 157,
+            "accuracy": 0.4615,
+            "ci_lo": 0.4017,
+            "ci_hi": 0.5256,
+            "vs_always_down": -0.2094
+          },
+          {
+            "ticker": "SOTUMAG",
+            "n": 234,
+            "n_up": 128,
+            "n_down": 106,
+            "accuracy": 0.4615,
+            "ci_lo": 0.3932,
+            "ci_hi": 0.5299,
+            "vs_always_down": 0.0085
+          },
+          {
+            "ticker": "ARTES",
+            "n": 234,
+            "n_up": 131,
+            "n_down": 103,
+            "accuracy": 0.4573,
+            "ci_lo": 0.3932,
+            "ci_hi": 0.5256,
+            "vs_always_down": 0.0171
+          },
+          {
+            "ticker": "TUNISIE LEASING F",
+            "n": 234,
+            "n_up": 129,
+            "n_down": 105,
+            "accuracy": 0.4487,
+            "ci_lo": 0.3846,
+            "ci_hi": 0.5171,
+            "vs_always_down": 0.0
+          },
+          {
+            "ticker": "SOTRAPIL",
+            "n": 234,
+            "n_up": 140,
+            "n_down": 94,
+            "accuracy": 0.4359,
+            "ci_lo": 0.3718,
+            "ci_hi": 0.5,
+            "vs_always_down": 0.0342
+          },
+          {
+            "ticker": "TPR",
+            "n": 234,
+            "n_up": 137,
+            "n_down": 97,
+            "accuracy": 0.4145,
+            "ci_lo": 0.3547,
+            "ci_hi": 0.4744,
+            "vs_always_down": 0.0
+          }
+        ],
+        "spread": {
+          "mean": 0.5167,
+          "median": 0.5214,
+          "std": 0.0479,
+          "q1": 0.4786,
+          "q3": 0.5534,
+          "min": 0.4145,
+          "max": 0.6026,
+          "n_tickers": 43,
+          "frac_below_50": 0.3953,
+          "frac_below_581": 0.8605,
+          "frac_above_77_4": 0.0
+        }
+      }
+    }
+  ],
+  "pairwise_mcnemar": [
+    {
+      "a": "logreg_l2",
+      "b": "random_forest",
+      "b_wrong_a_right": 1738,
+      "a_wrong_b_right": 1512,
+      "stat": 15.5769,
+      "p_value": 0.000414,
+      "test": "chi2_continuity"
+    },
+    {
+      "a": "logreg_l2",
+      "b": "xgboost_technical",
+      "b_wrong_a_right": 1372,
+      "a_wrong_b_right": 1247,
+      "stat": 5.8709,
+      "p_value": 0.053106,
+      "test": "chi2_continuity"
+    },
+    {
+      "a": "random_forest",
+      "b": "xgboost_technical",
+      "b_wrong_a_right": 1130,
+      "a_wrong_b_right": 1231,
+      "stat": 4.2355,
+      "p_value": 0.120302,
+      "test": "chi2_continuity"
+    }
+  ]
+}

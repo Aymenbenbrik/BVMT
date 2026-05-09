@@ -1,0 +1,662 @@
+{
+  "config": {
+    "transaction_cost": 0.005,
+    "risk_free_annual": 0.08,
+    "n_trials_for_dsr": 7,
+    "horizon_days": 7,
+    "trading_days_per_year": 252,
+    "strategies": [
+      "long_short",
+      "long_only"
+    ],
+    "n_predictions_total": 10013
+  },
+  "per_model": {
+    "pred_always_up": {
+      "long_short": {
+        "strategy": "long_short",
+        "n_trades": 10013,
+        "n_days": 234,
+        "gross": {
+          "cumulative_return": 3.1056,
+          "annualised_return": 3.6367,
+          "sharpe_ratio": 8.9996,
+          "sortino_ratio": 14.0805,
+          "max_drawdown": -0.1616,
+          "profit_factor": 4.3382,
+          "hit_ratio": 0.7308,
+          "deflated_sharpe": {
+            "dsr": 1.0,
+            "expected_max_sr": 1.3427,
+            "se_sr": 1.2459,
+            "skew": -0.447,
+            "kurt": 3.264,
+            "n_obs": 234,
+            "n_trials": 7,
+            "p_value": 0.0
+          }
+        },
+        "net": {
+          "cumulative_return": 0.2795,
+          "annualised_return": 0.3212,
+          "sharpe_ratio": 1.2419,
+          "sortino_ratio": 1.8226,
+          "max_drawdown": -0.2727,
+          "profit_factor": 1.3124,
+          "hit_ratio": 0.5726,
+          "deflated_sharpe": {
+            "dsr": 0.462119,
+            "expected_max_sr": 1.3427,
+            "se_sr": 1.0598,
+            "skew": -0.447,
+            "kurt": 3.264,
+            "n_obs": 234,
+            "n_trials": 7,
+            "p_value": 0.537881
+          }
+        }
+      },
+      "long_only": {
+        "strategy": "long_only",
+        "n_trades": 10013,
+        "n_days": 234,
+        "gross": {
+          "cumulative_return": 3.1056,
+          "annualised_return": 3.6367,
+          "sharpe_ratio": 8.9996,
+          "sortino_ratio": 14.0805,
+          "max_drawdown": -0.1616,
+          "profit_factor": 4.3382,
+          "hit_ratio": 0.7308,
+          "deflated_sharpe": {
+            "dsr": 1.0,
+            "expected_max_sr": 1.3427,
+            "se_sr": 1.2459,
+            "skew": -0.447,
+            "kurt": 3.264,
+            "n_obs": 234,
+            "n_trials": 7,
+            "p_value": 0.0
+          }
+        },
+        "net": {
+          "cumulative_return": 0.2795,
+          "annualised_return": 0.3212,
+          "sharpe_ratio": 1.2419,
+          "sortino_ratio": 1.8226,
+          "max_drawdown": -0.2727,
+          "profit_factor": 1.3124,
+          "hit_ratio": 0.5726,
+          "deflated_sharpe": {
+            "dsr": 0.462119,
+            "expected_max_sr": 1.3427,
+            "se_sr": 1.0598,
+            "skew": -0.447,
+            "kurt": 3.264,
+            "n_obs": 234,
+            "n_trials": 7,
+            "p_value": 0.537881
+          }
+        }
+      }
+    },
+    "pred_always_down": {
+      "long_short": {
+        "strategy": "long_short",
+        "n_trades": 10013,
+        "n_days": 234,
+        "gross": {
+          "cumulative_return": -0.7644,
+          "annualised_return": -0.7863,
+          "sharpe_ratio": -9.9474,
+          "sortino_ratio": -15.2806,
+          "max_drawdown": -0.7662,
+          "profit_factor": 0.2305,
+          "hit_ratio": 0.2692,
+          "deflated_sharpe": {
+            "dsr": 0.0,
+            "expected_max_sr": 1.3427,
+            "se_sr": 1.2747,
+            "skew": 0.447,
+            "kurt": 3.264,
+            "n_obs": 234,
+            "n_trials": 7,
+            "p_value": 1.0
+          }
+        },
+        "net": {
+          "cumulative_return": -0.9276,
+          "annualised_return": -0.9401,
+          "sharpe_ratio": -17.7051,
+          "sortino_ratio": -23.4616,
+          "max_drawdown": -0.9275,
+          "profit_factor": 0.076,
+          "hit_ratio": 0.1239,
+          "deflated_sharpe": {
+            "dsr": 0.0,
+            "expected_max_sr": 1.3427,
+            "se_sr": 1.5434,
+            "skew": 0.447,
+            "kurt": 3.264,
+            "n_obs": 234,
+            "n_trials": 7,
+            "p_value": 1.0
+          }
+        }
+      },
+      "long_only": {
+        "strategy": "long_only",
+        "n_trades": 10013,
+        "n_days": 234,
+        "gross": {
+          "cumulative_return": 0.0,
+          "annualised_return": 0.0,
+          "sharpe_ratio": NaN,
+          "sortino_ratio": NaN,
+          "max_drawdown": 0.0,
+          "profit_factor": NaN,
+          "hit_ratio": 0.0,
+          "deflated_sharpe": {
+            "dsr": NaN,
+            "expected_max_sr": NaN,
+            "p_value": NaN,
+            "n_trials": 7
+          }
+        },
+        "net": {
+          "cumulative_return": 0.0,
+          "annualised_return": 0.0,
+          "sharpe_ratio": NaN,
+          "sortino_ratio": NaN,
+          "max_drawdown": 0.0,
+          "profit_factor": NaN,
+          "hit_ratio": 0.0,
+          "deflated_sharpe": {
+            "dsr": NaN,
+            "expected_max_sr": NaN,
+            "p_value": NaN,
+            "n_trials": 7
+          }
+        }
+      }
+    },
+    "pred_momentum_5_20": {
+      "long_short": {
+        "strategy": "long_short",
+        "n_trades": 10013,
+        "n_days": 234,
+        "gross": {
+          "cumulative_return": 0.8675,
+          "annualised_return": 0.9755,
+          "sharpe_ratio": 4.7123,
+          "sortino_ratio": 6.5876,
+          "max_drawdown": -0.1621,
+          "profit_factor": 2.4282,
+          "hit_ratio": 0.7009,
+          "deflated_sharpe": {
+            "dsr": 0.998895,
+            "expected_max_sr": 1.3427,
+            "se_sr": 1.101,
+            "skew": -0.1756,
+            "kurt": 4.1204,
+            "n_obs": 234,
+            "n_trials": 7,
+            "p_value": 0.001105
+          }
+        },
+        "net": {
+          "cumulative_return": -0.4203,
+          "annualised_return": -0.4395,
+          "sharpe_ratio": -5.1058,
+          "sortino_ratio": -6.8623,
+          "max_drawdown": -0.452,
+          "profit_factor": 0.4574,
+          "hit_ratio": 0.3718,
+          "deflated_sharpe": {
+            "dsr": 0.0,
+            "expected_max_sr": 1.3427,
+            "se_sr": 1.0525,
+            "skew": -0.1756,
+            "kurt": 4.1204,
+            "n_obs": 234,
+            "n_trials": 7,
+            "p_value": 1.0
+          }
+        }
+      },
+      "long_only": {
+        "strategy": "long_only",
+        "n_trades": 10013,
+        "n_days": 234,
+        "gross": {
+          "cumulative_return": 1.7838,
+          "annualised_return": 2.0276,
+          "sharpe_ratio": 10.0984,
+          "sortino_ratio": 15.3582,
+          "max_drawdown": -0.0911,
+          "profit_factor": 5.2465,
+          "hit_ratio": 0.8077,
+          "deflated_sharpe": {
+            "dsr": 1.0,
+            "expected_max_sr": 1.3427,
+            "se_sr": 1.2827,
+            "skew": -0.4417,
+            "kurt": 3.374,
+            "n_obs": 234,
+            "n_trials": 7,
+            "p_value": 0.0
+          }
+        },
+        "net": {
+          "cumulative_return": 0.4775,
+          "annualised_return": 0.5305,
+          "sharpe_ratio": 3.4043,
+          "sortino_ratio": 4.6929,
+          "max_drawdown": -0.127,
+          "profit_factor": 1.9541,
+          "hit_ratio": 0.6538,
+          "deflated_sharpe": {
+            "dsr": 0.969201,
+            "expected_max_sr": 1.3427,
+            "se_sr": 1.1029,
+            "skew": -0.4569,
+            "kurt": 3.3242,
+            "n_obs": 234,
+            "n_trials": 7,
+            "p_value": 0.030799
+          }
+        }
+      }
+    },
+    "pred_ma20_crossover": {
+      "long_short": {
+        "strategy": "long_short",
+        "n_trades": 10013,
+        "n_days": 234,
+        "gross": {
+          "cumulative_return": 0.6548,
+          "annualised_return": 0.7346,
+          "sharpe_ratio": 3.6626,
+          "sortino_ratio": 5.2638,
+          "max_drawdown": -0.1788,
+          "profit_factor": 2.0001,
+          "hit_ratio": 0.6667,
+          "deflated_sharpe": {
+            "dsr": 0.983132,
+            "expected_max_sr": 1.3427,
+            "se_sr": 1.0926,
+            "skew": -0.3011,
+            "kurt": 3.581,
+            "n_obs": 234,
+            "n_trials": 7,
+            "p_value": 0.016868
+          }
+        },
+        "net": {
+          "cumulative_return": -0.4866,
+          "annualised_return": -0.5082,
+          "sharpe_ratio": -6.0656,
+          "sortino_ratio": -8.1258,
+          "max_drawdown": -0.5352,
+          "profit_factor": 0.3979,
+          "hit_ratio": 0.3889,
+          "deflated_sharpe": {
+            "dsr": 0.0,
+            "expected_max_sr": 1.3427,
+            "se_sr": 1.0291,
+            "skew": -0.3011,
+            "kurt": 3.581,
+            "n_obs": 234,
+            "n_trials": 7,
+            "p_value": 1.0
+          }
+        }
+      },
+      "long_only": {
+        "strategy": "long_only",
+        "n_trades": 10013,
+        "n_days": 234,
+        "gross": {
+          "cumulative_return": 1.6193,
+          "annualised_return": 1.8373,
+          "sharpe_ratio": 8.8862,
+          "sortino_ratio": 14.7485,
+          "max_drawdown": -0.0891,
+          "profit_factor": 4.4659,
+          "hit_ratio": 0.765,
+          "deflated_sharpe": {
+            "dsr": 1.0,
+            "expected_max_sr": 1.3427,
+            "se_sr": 1.1878,
+            "skew": -0.2718,
+            "kurt": 2.9443,
+            "n_obs": 234,
+            "n_trials": 7,
+            "p_value": 0.0
+          }
+        },
+        "net": {
+          "cumulative_return": 0.3805,
+          "annualised_return": 0.4235,
+          "sharpe_ratio": 2.5441,
+          "sortino_ratio": 3.8315,
+          "max_drawdown": -0.1548,
+          "profit_factor": 1.6867,
+          "hit_ratio": 0.6197,
+          "deflated_sharpe": {
+            "dsr": 0.869349,
+            "expected_max_sr": 1.3427,
+            "se_sr": 1.0695,
+            "skew": -0.2829,
+            "kurt": 2.9088,
+            "n_obs": 234,
+            "n_trials": 7,
+            "p_value": 0.130651
+          }
+        }
+      }
+    },
+    "pred_logreg_l2": {
+      "long_short": {
+        "strategy": "long_short",
+        "n_trades": 10013,
+        "n_days": 234,
+        "gross": {
+          "cumulative_return": 0.3568,
+          "annualised_return": 0.3964,
+          "sharpe_ratio": 2.4941,
+          "sortino_ratio": 4.5799,
+          "max_drawdown": -0.0949,
+          "profit_factor": 1.689,
+          "hit_ratio": 0.5556,
+          "deflated_sharpe": {
+            "dsr": 0.868408,
+            "expected_max_sr": 1.3427,
+            "se_sr": 1.029,
+            "skew": 0.215,
+            "kurt": 3.071,
+            "n_obs": 234,
+            "n_trials": 7,
+            "p_value": 0.131592
+          }
+        },
+        "net": {
+          "cumulative_return": -0.5795,
+          "annualised_return": -0.6045,
+          "sharpe_ratio": -9.7275,
+          "sortino_ratio": -13.9613,
+          "max_drawdown": -0.5914,
+          "profit_factor": 0.2457,
+          "hit_ratio": 0.2393,
+          "deflated_sharpe": {
+            "dsr": 0.0,
+            "expected_max_sr": 1.3427,
+            "se_sr": 1.1976,
+            "skew": 0.215,
+            "kurt": 3.071,
+            "n_obs": 234,
+            "n_trials": 7,
+            "p_value": 1.0
+          }
+        }
+      },
+      "long_only": {
+        "strategy": "long_only",
+        "n_trades": 10013,
+        "n_days": 234,
+        "gross": {
+          "cumulative_return": 1.3728,
+          "annualised_return": 1.5463,
+          "sharpe_ratio": 9.4331,
+          "sortino_ratio": 14.979,
+          "max_drawdown": -0.0827,
+          "profit_factor": 5.2301,
+          "hit_ratio": 0.7564,
+          "deflated_sharpe": {
+            "dsr": 1.0,
+            "expected_max_sr": 1.3427,
+            "se_sr": 1.2326,
+            "skew": -0.3299,
+            "kurt": 3.3646,
+            "n_obs": 234,
+            "n_trials": 7,
+            "p_value": 0.0
+          }
+        },
+        "net": {
+          "cumulative_return": 0.4582,
+          "annualised_return": 0.5072,
+          "sharpe_ratio": 3.6926,
+          "sortino_ratio": 5.5971,
+          "max_drawdown": -0.1255,
+          "profit_factor": 2.0737,
+          "hit_ratio": 0.6197,
+          "deflated_sharpe": {
+            "dsr": 0.983392,
+            "expected_max_sr": 1.3427,
+            "se_sr": 1.1035,
+            "skew": -0.3963,
+            "kurt": 3.4933,
+            "n_obs": 234,
+            "n_trials": 7,
+            "p_value": 0.016608
+          }
+        }
+      }
+    },
+    "pred_random_forest": {
+      "long_short": {
+        "strategy": "long_short",
+        "n_trades": 10013,
+        "n_days": 234,
+        "gross": {
+          "cumulative_return": -0.5989,
+          "annualised_return": -0.6221,
+          "sharpe_ratio": -7.1485,
+          "sortino_ratio": -10.8497,
+          "max_drawdown": -0.6042,
+          "profit_factor": 0.3554,
+          "hit_ratio": 0.3034,
+          "deflated_sharpe": {
+            "dsr": 0.0,
+            "expected_max_sr": 1.3427,
+            "se_sr": 1.1353,
+            "skew": 0.2066,
+            "kurt": 2.9454,
+            "n_obs": 234,
+            "n_trials": 7,
+            "p_value": 1.0
+          }
+        },
+        "net": {
+          "cumulative_return": -0.8765,
+          "annualised_return": -0.8937,
+          "sharpe_ratio": -15.7414,
+          "sortino_ratio": -21.381,
+          "max_drawdown": -0.8769,
+          "profit_factor": 0.0999,
+          "hit_ratio": 0.1709,
+          "deflated_sharpe": {
+            "dsr": 0.0,
+            "expected_max_sr": 1.3427,
+            "se_sr": 1.3492,
+            "skew": 0.2066,
+            "kurt": 2.9454,
+            "n_obs": 234,
+            "n_trials": 7,
+            "p_value": 1.0
+          }
+        }
+      },
+      "long_only": {
+        "strategy": "long_only",
+        "n_trades": 10013,
+        "n_days": 234,
+        "gross": {
+          "cumulative_return": 0.3002,
+          "annualised_return": 0.3279,
+          "sharpe_ratio": 4.9671,
+          "sortino_ratio": 8.8614,
+          "max_drawdown": -0.0513,
+          "profit_factor": 3.1243,
+          "hit_ratio": 0.6752,
+          "deflated_sharpe": {
+            "dsr": 0.999735,
+            "expected_max_sr": 1.3427,
+            "se_sr": 1.0459,
+            "skew": 0.2465,
+            "kurt": 4.6175,
+            "n_obs": 234,
+            "n_trials": 7,
+            "p_value": 0.000265
+          }
+        },
+        "net": {
+          "cumulative_return": 0.0424,
+          "annualised_return": 0.0466,
+          "sharpe_ratio": -0.7485,
+          "sortino_ratio": -1.2066,
+          "max_drawdown": -0.1007,
+          "profit_factor": 1.1958,
+          "hit_ratio": 0.5299,
+          "deflated_sharpe": {
+            "dsr": 0.022676,
+            "expected_max_sr": 1.3427,
+            "se_sr": 1.0449,
+            "skew": 0.1606,
+            "kurt": 4.5136,
+            "n_obs": 234,
+            "n_trials": 7,
+            "p_value": 0.977324
+          }
+        }
+      }
+    },
+    "pred_xgboost": {
+      "long_short": {
+        "strategy": "long_short",
+        "n_trades": 10013,
+        "n_days": 234,
+        "gross": {
+          "cumulative_return": -0.1682,
+          "annualised_return": -0.175,
+          "sharpe_ratio": -2.4491,
+          "sortino_ratio": -3.8821,
+          "max_drawdown": -0.2223,
+          "profit_factor": 0.7498,
+          "hit_ratio": 0.4274,
+          "deflated_sharpe": {
+            "dsr": 0.000188,
+            "expected_max_sr": 1.3427,
+            "se_sr": 1.0662,
+            "skew": 0.2459,
+            "kurt": 3.2059,
+            "n_obs": 234,
+            "n_trials": 7,
+            "p_value": 0.999812
+          }
+        },
+        "net": {
+          "cumulative_return": -0.7428,
+          "annualised_return": -0.7669,
+          "sharpe_ratio": -13.9103,
+          "sortino_ratio": -18.5562,
+          "max_drawdown": -0.7423,
+          "profit_factor": 0.1271,
+          "hit_ratio": 0.1667,
+          "deflated_sharpe": {
+            "dsr": 0.0,
+            "expected_max_sr": 1.3427,
+            "se_sr": 1.3314,
+            "skew": 0.2459,
+            "kurt": 3.2059,
+            "n_obs": 234,
+            "n_trials": 7,
+            "p_value": 1.0
+          }
+        }
+      },
+      "long_only": {
+        "strategy": "long_only",
+        "n_trades": 10013,
+        "n_days": 234,
+        "gross": {
+          "cumulative_return": 0.8619,
+          "annualised_return": 0.9588,
+          "sharpe_ratio": 7.8237,
+          "sortino_ratio": 14.1646,
+          "max_drawdown": -0.079,
+          "profit_factor": 4.0171,
+          "hit_ratio": 0.7009,
+          "deflated_sharpe": {
+            "dsr": 1.0,
+            "expected_max_sr": 1.3427,
+            "se_sr": 1.145,
+            "skew": -0.2041,
+            "kurt": 2.8373,
+            "n_obs": 234,
+            "n_trials": 7,
+            "p_value": 0.0
+          }
+        },
+        "net": {
+          "cumulative_return": 0.2039,
+          "annualised_return": 0.2247,
+          "sharpe_ratio": 1.6635,
+          "sortino_ratio": 2.7235,
+          "max_drawdown": -0.1701,
+          "profit_factor": 1.5099,
+          "hit_ratio": 0.5684,
+          "deflated_sharpe": {
+            "dsr": 0.619218,
+            "expected_max_sr": 1.3427,
+            "se_sr": 1.0573,
+            "skew": -0.2735,
+            "kurt": 2.8329,
+            "n_obs": 234,
+            "n_trials": 7,
+            "p_value": 0.380782
+          }
+        }
+      }
+    }
+  },
+  "latex_rows": {
+    "long_short_gross": [
+      "always up              & 310.56\\% & 363.67\\% &   9.00 & -16.16\\% &  4.34 &  73.1\\% & 0.000 \\\\",
+      "always down            & -76.44\\% & -78.63\\% &  -9.95 & -76.62\\% &  0.23 &  26.9\\% & 1.000 \\\\",
+      "momentum 5 20          &  86.75\\% &  97.55\\% &   4.71 & -16.21\\% &  2.43 &  70.1\\% & 0.001 \\\\",
+      "ma20 crossover         &  65.48\\% &  73.46\\% &   3.66 & -17.88\\% &  2.00 &  66.7\\% & 0.017 \\\\",
+      "logreg l2              &  35.68\\% &  39.64\\% &   2.49 &  -9.49\\% &  1.69 &  55.6\\% & 0.132 \\\\",
+      "random forest          & -59.89\\% & -62.21\\% &  -7.15 & -60.42\\% &  0.36 &  30.3\\% & 1.000 \\\\",
+      "xgboost                & -16.82\\% & -17.50\\% &  -2.45 & -22.23\\% &  0.75 &  42.7\\% & 1.000 \\\\"
+    ],
+    "long_short_net": [
+      "always up              &  27.95\\% &  32.12\\% &   1.24 & -27.27\\% &  1.31 &  57.3\\% & 0.538 \\\\",
+      "always down            & -92.76\\% & -94.01\\% & -17.71 & -92.75\\% &  0.08 &  12.4\\% & 1.000 \\\\",
+      "momentum 5 20          & -42.03\\% & -43.95\\% &  -5.11 & -45.20\\% &  0.46 &  37.2\\% & 1.000 \\\\",
+      "ma20 crossover         & -48.66\\% & -50.82\\% &  -6.07 & -53.52\\% &  0.40 &  38.9\\% & 1.000 \\\\",
+      "logreg l2              & -57.95\\% & -60.45\\% &  -9.73 & -59.14\\% &  0.25 &  23.9\\% & 1.000 \\\\",
+      "random forest          & -87.65\\% & -89.37\\% & -15.74 & -87.69\\% &  0.10 &  17.1\\% & 1.000 \\\\",
+      "xgboost                & -74.28\\% & -76.69\\% & -13.91 & -74.23\\% &  0.13 &  16.7\\% & 1.000 \\\\"
+    ],
+    "long_only_gross": [
+      "always up              & 310.56\\% & 363.67\\% &   9.00 & -16.16\\% &  4.34 &  73.1\\% & 0.000 \\\\",
+      "always down            &   0.00\\% &   0.00\\% &    nan &   0.00\\% &   nan &   0.0\\% & nan \\\\",
+      "momentum 5 20          & 178.38\\% & 202.76\\% &  10.10 &  -9.11\\% &  5.25 &  80.8\\% & 0.000 \\\\",
+      "ma20 crossover         & 161.93\\% & 183.73\\% &   8.89 &  -8.91\\% &  4.47 &  76.5\\% & 0.000 \\\\",
+      "logreg l2              & 137.28\\% & 154.63\\% &   9.43 &  -8.27\\% &  5.23 &  75.6\\% & 0.000 \\\\",
+      "random forest          &  30.02\\% &  32.79\\% &   4.97 &  -5.13\\% &  3.12 &  67.5\\% & 0.000 \\\\",
+      "xgboost                &  86.19\\% &  95.88\\% &   7.82 &  -7.90\\% &  4.02 &  70.1\\% & 0.000 \\\\"
+    ],
+    "long_only_net": [
+      "always up              &  27.95\\% &  32.12\\% &   1.24 & -27.27\\% &  1.31 &  57.3\\% & 0.538 \\\\",
+      "always down            &   0.00\\% &   0.00\\% &    nan &   0.00\\% &   nan &   0.0\\% & nan \\\\",
+      "momentum 5 20          &  47.75\\% &  53.05\\% &   3.40 & -12.70\\% &  1.95 &  65.4\\% & 0.031 \\\\",
+      "ma20 crossover         &  38.05\\% &  42.35\\% &   2.54 & -15.48\\% &  1.69 &  62.0\\% & 0.131 \\\\",
+      "logreg l2              &  45.82\\% &  50.72\\% &   3.69 & -12.55\\% &  2.07 &  62.0\\% & 0.017 \\\\",
+      "random forest          &   4.24\\% &   4.66\\% &  -0.75 & -10.07\\% &  1.20 &  53.0\\% & 0.977 \\\\",
+      "xgboost                &  20.39\\% &  22.47\\% &   1.66 & -17.01\\% &  1.51 &  56.8\\% & 0.381 \\\\"
+    ]
+  }
+}

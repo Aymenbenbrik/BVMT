@@ -20,7 +20,16 @@
       "Bash(python -m pytest tests/test_no_leakage.py -q)",
       "Bash(python)",
       "Bash(python training/cnn_lstm_seed_sweep.py --n 2 --dry-run)",
-      "Bash(python scripts/evaluate_sentiment_labels.py --help)"
+      "Bash(python scripts/evaluate_sentiment_labels.py --help)",
+      "Bash(python -m training.baselines.trivial)",
+      "Bash(python -c \"import sklearn, xgboost, numpy, pandas; print\\('sklearn', sklearn.__version__\\); print\\('xgboost', xgboost.__version__\\); print\\('numpy', numpy.__version__\\); print\\('pandas', pandas.__version__\\)\")",
+      "Bash(pip install *)",
+      "Bash(python -c \"import xgboost; print\\('xgboost', xgboost.__version__\\)\")",
+      "Bash(python -m training.baselines.ml_classics --smoke 3 --rf-n-estimators 100)",
+      "Bash(python -m training.baselines.ml_classics --rf-n-estimators 200)",
+      "Bash(break)",
+      "Bash(python -m training.baselines.economic_metrics)",
+      "Bash(git commit *)"
     ]
   }
 }
