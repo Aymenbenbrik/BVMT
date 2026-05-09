@@ -449,9 +449,9 @@ where $\Phi^{(i)}$ is a feature-specific transformation network (small MLP) and 
 hidden\_size & 64 & Increased from 32 in v2 \\
 attention\_heads & 4 & Standard for financial TFT \\
 dropout & 0.3 & CRITICAL: v2 regression to 0.1 \\
-encoder\_window & 60 days & $\sim{}$3 calendar months \\
+encoder\_window & 30 days & $\sim{}$6 trading weeks (v3 setting) \\
 prediction\_horizon & 7 days & 1 trading week \\
-learning\_rate & 0.0003 & Reduced from 0.001 post-epoch-6 \\
+learning\_rate & 0.0003 & Reduced from $10^{-3}$ (v1) to $3\times 10^{-4}$ (v3) \\
 warmup\_epochs & 3 & Ramps LR 10\% to 100\% \\
 weight\_decay & $10^{-4}$ & L2 regularization \\
 gradient\_clip & 0.5 & Relaxed from 0.1 \\
@@ -592,7 +592,7 @@ The narrow band [51.7\%, 53.8\%] across all four runs demonstrates that the CNN-
 \node[font=\tiny, rotate=90] at (axis cs:1.5,0.60) {warmup};
 \end{axis}
 \end{tikzpicture}
-\caption{TFT validation loss curves for v1 and v3. TFT v1 peaks at epoch 6 and degrades (premature convergence due to LR=0.001). TFT v3 with warmup continues improving until epoch 16, achieving val\_loss=0.5161. The yellow shaded region indicates the 3-epoch warmup phase. The horizontal dotted line is the random baseline (0.6931).}
+\caption{TFT validation loss curves. v1 (BCE on \texttt{direction\_7d}) peaks around epoch 7 and degrades, consistent with premature convergence at LR$=10^{-3}$. v3 (pinball on \texttt{future\_return\_7d}) uses LR$=3\times 10^{-4}$ with a 3-epoch warmup (yellow shaded region) and continues improving until epoch 16, reaching val\_loss$=0.5161$. The horizontal dotted line is the random-classifier BCE baseline ($\ln 2 = 0.6931$); it bounds v1 only, since v3 is on a different loss scale (Section~\ref{sec:results}).}
 \label{fig:training_curves}
 \end{figure}
 
@@ -600,25 +600,22 @@ The narrow band [51.7\%, 53.8\%] across all four runs demonstrates that the CNN-
 
 \begin{table*}[htbp]
 \centering
-\caption{TFT progression: validation loss improvement from v1 to v3}
+\caption{TFT progression: validation loss from v1 (binary classification, BCE) to v3 (quantile regression, pinball). The two losses live on different scales; the percentage column is provided for v1 only, where it is comparable to a random-classifier BCE baseline of $\ln 2 \approx 0.6931$. The v3 row is reported for completeness; its loss is not directly comparable to the BCE baseline, see Section~\ref{sec:results}.}
 \label{tab:tft_progression}
 \small
-\begin{tabular}{lcccl}
+\begin{tabular}{lccccl}
 \toprule
-\textbf{Version} & \textbf{Val Loss} & \textbf{vs Random} & \textbf{Best Epoch} & \textbf{Key Change} \\
+\textbf{Version} & \textbf{Loss type} & \textbf{Val Loss} & \textbf{vs Random BCE} & \textbf{Best Epoch} & \textbf{Key Change} \\
 \midrule
-Random baseline & 0.6931 & — & — & Log(2) binary \\
-TFT v1 Run 1 & 0.6036 & +12.9\% & 6 & Initial configuration \\
-TFT v1 Run 2 & 0.6036 & +13.1\% & 6 & dropout=0.3 fix \\
-TFT v3 Final & 0.5161 & +25.5\% & 16 & All 10 enhancements \\
+Random baseline   & BCE     & 0.6931 & ---     & --- & $\ln 2$ binary \\
+TFT v1 (consolidated)  & BCE     & 0.6051 & $+12.7\%$ & 7   & dropout 0.3, hidden 32, no warmup \\
+TFT v3 Final      & Pinball & 0.5161 & n/a     & 16  & quantile regression (Q10/Q50/Q90), warmup, hidden 64, dropout 0.3 \\
 \bottomrule
 \end{tabular}
 \normalsize
 \end{table*}
 
-The improvement from v1 to v3 is substantial: absolute loss reduction of 0.0875 is 58$\times$ larger than the improvement from Run 1 to Run 2 (0.0015). This demonstrates that the 10 targeted architectural fixes produced step-change improvement, not incremental tuning.
-
-Note that best epoch jumped from 6 to 16 — the warmup scheduler enabled productive training for 2.7$\times$ more epochs before reaching optimum. This is evidence that the previous learning rate regime caused premature convergence.
+The v1 entry consolidates the development iterations recorded under \texttt{lightning\_logs/version\_0..4} (all sharing the dropout~$=0.3$, hidden~$=32$ configuration); the best epoch and validation loss above are read directly from \texttt{results/metrics.csv}. The transition from v1 to v3 changes the prediction target (binary direction $\rightarrow$ continuous 7-day return) and the loss family (BCE $\rightarrow$ pinball); a head-to-head BCE comparison would require a binary-classification re-run of v3 and is left to future work. The best epoch shift from 7 to 16 is consistent with the introduction of the 3-epoch warmup in v3 and a learning rate reduced from $10^{-3}$ to $3\times 10^{-4}$, which together delay convergence and avoid the v1 over-fitting plateau visible in Figure~\ref{fig:training_curves}.
 
 \subsection{Directional Accuracy on Test Data}
 
@@ -659,18 +656,45 @@ TFT v3 achieves 77.4\% directional accuracy on the unseen 2025 test set, compare
 
 \subsection{Contextualizing Directional Accuracy}
 
-The 77.4\% directional accuracy must be interpreted in the context of market class imbalance. Across all 68 stocks and all 10 years of data, the market exhibits a 41.9\% UP ratio — only 41.9\% of 7-day windows show positive returns. This is a bearish bias.
+The 77.4\% directional accuracy must be interpreted in the context of market class imbalance. Across all 68 stocks and all 10 years of data, the market exhibits a 41.9\% UP ratio --- only 41.9\% of 7-day windows show positive returns. The bearish bias makes \emph{always-DOWN}, not the uniform 50/50 random classifier, the relevant naive baseline:
 
-A naive ``always predict UP'' strategy achieves only 41.9\% accuracy, substantially below the 50\% random baseline due to class imbalance. TFT's 77.4\% accuracy is therefore particularly meaningful: the model not only exceeds random but does so in a market with structural bias toward the minority class.
+\begin{table}[htbp]
+\centering
+\caption{TFT v3 directional accuracy versus the three relevant naive baselines on the 2025 test set.}
+\label{tab:baselines}
+\small
+\begin{tabular}{lcc}
+\toprule
+\textbf{Baseline} & \textbf{Accuracy} & \textbf{TFT v3 lift} \\
+\midrule
+Always-UP                       & 41.9\% & $+35.5$ pp \\
+Random uniform 50/50            & 50.0\% & $+27.4$ pp \\
+\textbf{Always-DOWN (majority)} & \textbf{58.1\%} & \textbf{$+19.3$ pp} \\
+TFT v3 (this work)              & 77.4\% & --- \\
+\bottomrule
+\end{tabular}
+\normalsize
+\end{table}
 
-\subsection{Information-Theoretic Interpretation}
+The honest comparison is therefore $+19.3$ percentage points over always-DOWN, not the often-quoted $+27.4$ pp over random. We retain the random reference for cross-paper comparability, but flag that always-DOWN is the only naive baseline a quantitative finance reviewer will accept on a thin market with structural bearish bias. Per-stock accuracy and statistical significance versus always-DOWN (McNemar test) are reported in Section~\ref{sec:experiments} once the competitive baselines from Phase~1 of the improvement plan are available.
 
-Validation loss is cross-entropy: 
-$$\mathcal{L} = -\frac{1}{N} \sum_{i=1}^{N} [y_i \log(\hat{p}_i) + (1-y_i) \log(1-\hat{p}_i)]$$
+\subsection{Loss Interpretation Across Versions}
 
-A loss of 0.6931 nats represents zero information beyond the class prior — the model's probability assignments carry no signal. A loss of 0.5161 nats indicates substantial information content. The reduction of 0.1770 nats quantifies the mutual information extracted from the 60-day feature window.
+The two TFT versions optimize different losses, and their numerical values in Table~\ref{tab:tft_progression} should not be compared directly.
 
-For comparison: random predictions (uniform probabilities) yield 0.6931; a perfect predictor yields 0. TFT at 0.5161 reduces the baseline entropy by 25.5\%, consistent with the directional improvement reported: $\frac{\mathcal{L}_{\text{baseline}} - \mathcal{L}_{\text{TFT}}}{\mathcal{L}_{\text{baseline}}} = \frac{0.6931 - 0.5161}{0.6931} = 0.255$. This 25.5\% entropy reduction indicates that the 60-day feature window provides meaningful predictive signal beyond the class prior.
+\textbf{TFT v1 — binary cross-entropy.} The v1 target is the binary direction \texttt{direction\_7d} $\in \{0, 1\}$ and the loss is BCE
+$$
+\mathcal{L}_{\mathrm{BCE}} = -\frac{1}{N} \sum_{i=1}^{N} \bigl[y_i \log \hat{p}_i + (1-y_i)\log(1-\hat{p}_i)\bigr].
+$$
+The random-classifier baseline is $\ln 2 = 0.6931$ nats. v1 reaches val\_loss$=0.6051$, an entropy reduction of $\frac{0.6931 - 0.6051}{0.6931} \approx 12.7\%$. This quantifies the mutual information that a BCE-trained TFT extracts from the 30-day feature window beyond the class prior.
+
+\textbf{TFT v3 --- pinball quantile loss.} The v3 target is the continuous fractional 7-day return \texttt{future\_return\_7d} clipped to $[-15\%, +15\%]$, and the model jointly predicts the quantiles $Q_{0.1}, Q_{0.5}, Q_{0.9}$. The loss is the multi-quantile pinball loss
+$$
+\mathcal{L}_{\mathrm{pin}} = \frac{1}{N} \sum_{i=1}^{N} \sum_{\tau \in \{0.1, 0.5, 0.9\}} \rho_\tau\bigl(y_i - \hat{Q}_\tau(x_i)\bigr),
+$$
+where $\rho_\tau(u) = u(\tau - \mathbf{1}_{u<0})$. v3's val\_loss of $0.5161$ is therefore measured in the units of clipped fractional return, not in nats; the BCE baseline of $0.6931$ is not its lower bound and the ``$+25.5\%$ vs Random'' figure that appeared in earlier drafts is not well-defined for this loss.
+
+Two version-agnostic measures of skill are appropriate here: the directional accuracy reported in Section~\ref{sec:results}.A and Table~\ref{tab:baselines} (an $+19.3$ pp lift of v3 over the always-DOWN baseline), and the empirical quantile-coverage analysis discussed in the next subsection. A like-for-like BCE comparison of v3 against v1 would require a binary-classification re-run of the v3 architecture and is identified as a deliverable of Phase~1 in our improvement plan.
 
 \subsection{Quantile Regression and Uncertainty Quantification}
 
