@@ -18,7 +18,9 @@
       "Bash(python -c ' *)",
       "Bash(python -c \"import pytest, sklearn, pandas; print\\(pytest.__version__, sklearn.__version__, pandas.__version__\\)\")",
       "Bash(python -m pytest tests/test_no_leakage.py -q)",
-      "Bash(python)"
+      "Bash(python)",
+      "Bash(python training/cnn_lstm_seed_sweep.py --n 2 --dry-run)",
+      "Bash(python scripts/evaluate_sentiment_labels.py --help)"
     ]
   }
 }

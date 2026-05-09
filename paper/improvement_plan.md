@@ -99,6 +99,41 @@ Tous entraînés sur les mêmes 15 features × 60 jours, mais aplaties (le modè
 | TFT − norm/action | Normalisation globale (un seul $\mu, \sigma$) | Quantifier le gain de la normalisation par action |
 | TFT − confidence gating | Désactiver Eq. 3 | Quantifier l'apport du gating |
 
+### Action 1.4b — CNN-LSTM seed sweep statistiquement puissant (réponse à B3)
+
+**Constat** : la table actuelle `tab:cnn_lstm_ablation` rapporte 4 runs avec des hyperparamètres différents (batch_size 64/128, version v1/v2). Sur un test set de quelques milliers de prédictions, l'écart-type d'une accuracy binaire est ~0,5–1,0 pp, donc la fourchette observée [51,7%, 53,8%] (2,1 pp) est **dans le bruit**, pas un plafond statistique.
+
+**Outils livrés** :
+- `training/train_cnn_lstm.py` patché pour lire `BVMT_SEED` (numpy + torch + cuDNN deterministic) et `BVMT_SMOKE` (override de la config par défaut).
+- `training/cnn_lstm_seed_sweep.py` : harness qui spawn N processus enfants, agrège les `results/results_cnnlstm_v2_*_seed<S>.json`, calcule mean ± IC 95% bootstrap, médiane, Q1/Q3, et test de Wilcoxon vs always-DOWN (58,1%).
+
+**Protocole** :
+
+```bash
+# 1. Sanity check (3 seeds smoke, ~5 min sur GPU)
+python training/cnn_lstm_seed_sweep.py --n 3 --smoke true
+
+# 2. Sweep complet (20 seeds, ~6-12 h sur GPU T4 / Lightning AI)
+python training/cnn_lstm_seed_sweep.py --n 20 --smoke false
+```
+
+**Critère de validation du « ceiling »** : la médiane et le 3e quartile (Q3) du test_acc sur 20 seeds restent < 56% (`CEILING_CANDIDATE_PCT` dans le harness). Si Q3 < 56%, le claim « architectural ceiling » est défendable. Sinon, la formulation doit rester « consistent four-run signature ».
+
+**Tests statistiques** :
+- Wilcoxon (deux côtés) vs always-DOWN 58,1% → p-value attendue petite si CNN-LSTM ne bat pas la majorité bear.
+- Wilcoxon (deux côtés) vs random 50% → indique si CNN-LSTM extrait au moins du signal.
+
+**Livrable** : nouvelle table `tab:cnn_lstm_seed_sweep` dans §V.A :
+
+| Modèle | N seeds | mean test_acc (%) | IC 95% | médiane | Q3 | p (vs always-DOWN) |
+|---|---|---|---|---|---|---|
+| CNN-LSTM v2 | 20 | … | […, …] | … | … | … |
+| TFT v3 | 1 (déterministe) | 77,4 | n/a | — | — | … |
+
+→ Si Q3 < 56%, la prose actuelle (§V.A « consistent four-run signature ») peut redevenir « empirical ceiling ». Sinon, la formulation prudente reste.
+
+**Garde-fou** : le harness journalise le seed dans `run_name` et le JSON, donc une re-exécution est traçable. Le fail d'un seed individuel n'invalide pas le sweep — le summary skip et liste les seeds échoués.
+
 ### Action 1.5 — Métriques à calculer pour CHAQUE modèle
 
 Pour répondre à C1 simultanément :
@@ -160,6 +195,102 @@ Sur le test set 2025, simuler une stratégie *long-short* basée sur les prédic
 |---|---|---|---|---|---|---|---|
 
 **Code** : `training/baselines/` (un fichier par baseline).
+
+### Action 1.8 — Per-stock breakdown TFT v3 (réponse à D3)
+
+**Constat** : le 77,4 % est un agrégat **pooled** sur 10 314 prédictions × 43 tickers. Aucun fichier de prédictions per-row n'existe pour le v3 quantile (le script `training/evaluate_tft.py` cible le v1 binaire). Donc on ne peut pas dire si le 77,4 % est porté par 8 grands tickers liquides ou réparti uniformément.
+
+**Outils livrés** :
+- `training/evaluate_tft_v3_per_row.py` : évaluation TFT v3 sur le test 2025, persiste `(ticker, ticker_id, isin_code, date, time_idx, q10, q50, q90, true_return_7d, true_direction, pred_direction_R1)` dans `results/tft_v3_predictions_2025.csv`.
+- `scripts/per_stock_breakdown.py` : agrège la CSV → table per-ticker avec accuracy, 95% bootstrap CI, lift vs always-DOWN ; produit le summary JSON + LaTeX rows pour `tab:per_stock_breakdown`.
+
+**Protocole** :
+
+```bash
+# 1. Re-générer les prédictions per-row (requiert le checkpoint v3 + GPU recommandé)
+python training/evaluate_tft_v3_per_row.py \
+    --ckpt models/tft_quantile_v2_fixed_*.ckpt \
+    --out  results/tft_v3_predictions_2025.csv
+
+# 2. Agréger par ticker
+python scripts/per_stock_breakdown.py \
+    --in   results/tft_v3_predictions_2025.csv \
+    --out  reports/per_stock/breakdown.json \
+    --csv  reports/per_stock/per_ticker_table.csv \
+    --rule R1
+```
+
+**Critères et lectures à faire**
+
+| Indicateur | Cible saine | Inquiétant |
+|---|---|---|
+| `mean per-ticker acc` | proche du 77,4 % pooled | ≥ 5 pp en dessous → l'agrégat est tiré par les volumes |
+| `median per-ticker acc` | ≥ 70 % | < 60 % → agrégat porté par une minorité |
+| `IQR` (Q3 − Q1) | ≤ 15 pp | > 25 pp → forte hétérogénéité |
+| `fraction < 50 %` | ≤ 10 % | > 30 % → de nombreux tickers en dessous du hasard |
+| `fraction < 58,1 %` (always-DOWN) | ≤ 25 % | > 50 % → modèle fait pire que la baseline naïve sur la majorité |
+| Lift moyen vs always-DOWN | + 19 pp | < + 5 pp → l'avantage TFT s'évapore une fois pondéré par stock |
+
+**Livrable article** : nouvelle table `tab:per_stock_breakdown` dans §V, avec **Top 5 / Bottom 5** :
+
+| Catégorie | Ticker | n | accuracy (%) | IC 95% | lift vs always-DOWN |
+|---|---|---|---|---|---|
+| Best 1 | … | … | … | […, …] | … |
+| … | … | … | … | … | … |
+| Worst 5 | … | … | … | […, …] | … |
+
+**Bonus utile pour la critique** : le même CSV alimente Action 1.5b (sensitivity quantile→direction R1/R2/R3/R4) sans re-exécuter le modèle.
+
+**Garde-fou éditorial** : si la médiane per-ticker est < 60 %, l'article doit reformuler le headline « 77,4 % directional accuracy » en « 77,4 % pooled directional accuracy, with median per-ticker accuracy of XX,X % », et faire suivre d'une discussion sur la concentration de la performance.
+
+### Action 1.7 — Validation expert du modèle de sentiment (réponse à B5)
+
+**Constat** : le `SentimentAgent` utilise `bardsai/finance-sentiment-fr-base` comme boîte noire pré-entraînée. La performance reportée par Rguibi et al. 2023 (5–15 pp d'amélioration) est mesurée sur **leur** benchmark, pas sur ilboursa.com. ~15% des articles sont arabes, scorés par un modèle français → garbage in / garbage out probable.
+
+**Outils livrés** :
+- `scripts/sample_news_for_labelling.py` : échantillonnage stratifié par (année, langue, label-modèle), 200 articles, export CSV avec colonnes `expert_label` / `expert_confidence` / `expert_notes` à remplir.
+- `scripts/evaluate_sentiment_labels.py` : calcul accuracy, F1 par classe, macro-F1, Cohen κ, breakdown FR/AR, row LaTeX paste-ready pour `tab:sentiment_validation`.
+
+**Protocole** :
+
+```bash
+# 1. Échantillonner 200 articles (DB doit être accessible)
+python scripts/sample_news_for_labelling.py --n 200 \
+    --out reports/sentiment_validation/sample_to_label.csv
+
+# 2. Le labeller (étape humaine, ~4-8 h)
+#    - Ouvrir le CSV dans LibreOffice/Excel/Sheets
+#    - Remplir expert_label ∈ {positive, neutral, negative}
+#    - expert_confidence ∈ {high, medium, low}
+#    - expert_notes pour les cas ambigus (sarcasme, signaux mixtes, arabe)
+#    - Convention : labelliser sur l'impact financier perçu pour le ticker,
+#      pas sur le ton émotionnel pur de l'article.
+
+# 3. Évaluer
+python scripts/evaluate_sentiment_labels.py \
+    --in reports/sentiment_validation/sample_to_label.csv \
+    --out reports/sentiment_validation/eval_report.json
+```
+
+**Critères de succès** :
+
+| Métrique | Cible (FR) | Acceptable | Échec |
+|---|---|---|---|
+| Accuracy | ≥ 70% | 60–70% | < 60% |
+| Macro-F1 | ≥ 0,65 | 0,55–0,65 | < 0,55 |
+| Cohen κ | ≥ 0,50 (modéré-substantial Landis-Koch) | 0,30–0,50 | < 0,30 |
+
+**Si échec** : pivoter vers (i) fine-tuning du modèle bardsai sur 200–500 labels supplémentaires, ou (ii) remplacer par un modèle plus récent (e.g. `cmarkea/distilcamembert-base-sentiment` finetuné finance), ou (iii) downgrader la weight base du SentimentAgent en dessous de 0,20.
+
+**Sur l'arabe** : on s'attend à κ ≈ 0 sur le subset AR (modèle français, articles arabes). Cela motive l'intégration AraBERT déjà listée en Future Work — mais ne ressuscitera pas le SentimentAgent sur AR pour le papier actuel.
+
+**Livrable article** : nouvelle table `tab:sentiment_validation` dans §V (ou en annexe si l'espace manque) :
+
+| Modèle | n labels | n FR/AR | Accuracy (%) | Macro-F1 (%) | Cohen κ |
+|---|---|---|---|---|---|
+| bardsai/finance-sentiment-fr-base | … | …/… | … | … | … |
+
+→ Si κ ≥ 0,50, le claim de qualité du sentiment devient defendable et l'article peut quantifier l'incertitude. Si κ < 0,30, le SentimentAgent doit être remis en question (poids réduit ou agent désactivé pendant la Phase 2 d'ablation).
 
 ---
 

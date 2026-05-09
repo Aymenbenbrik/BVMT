@@ -13,6 +13,8 @@
 
 import inspect
 import json
+import os
+import random
 import warnings
 from datetime import datetime
 from pathlib import Path
@@ -31,10 +33,49 @@ print("CUDA available :", torch.cuda.is_available())
 
 
 # ══════════════════════════════════════════════════════════════════════════
+# REPRODUCIBILITY — seed injection for the seed-sweep harness (B3)
+#
+# When BVMT_SEED is set in the environment, the script becomes reproducible
+# at the level pytorch can guarantee on a given hardware (cuDNN may still
+# add small stochasticity across drivers). The seed is also embedded in
+# run_name so the seed-sweep harness can collect per-seed result files.
+#
+# When BVMT_SEED is absent, the previous non-deterministic behavior is
+# preserved.
+#
+# When BVMT_SMOKE is set ("0" or "false"), it overrides SMOKE_TEST below.
+# This lets the sweep harness force a full run without editing the file.
+# ══════════════════════════════════════════════════════════════════════════
+
+BVMT_SEED_ENV = os.environ.get("BVMT_SEED")
+SEED = int(BVMT_SEED_ENV) if BVMT_SEED_ENV is not None else None
+if SEED is not None:
+    random.seed(SEED)
+    np.random.seed(SEED)
+    torch.manual_seed(SEED)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(SEED)
+    # Best-effort determinism on cuDNN; not a guarantee across hardware.
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    print(f"BVMT_SEED={SEED} -> deterministic mode (numpy, torch, cuDNN)")
+else:
+    print("BVMT_SEED not set -> non-deterministic mode (legacy)")
+
+
+# ══════════════════════════════════════════════════════════════════════════
 # SECTION 1 — CONFIGURATION
 # ══════════════════════════════════════════════════════════════════════════
 
-SMOKE_TEST = True  # SET TO FALSE FOR FULL TRAINING ON LIGHTNING AI
+# BVMT_SMOKE env var overrides this default. Accepted "true" values:
+# "0" / "false" / "no" (case-insensitive) -> full training; anything else
+# (including unset) -> the file default below.
+_SMOKE_DEFAULT = True
+_smoke_env = os.environ.get("BVMT_SMOKE")
+if _smoke_env is not None and _smoke_env.strip().lower() in {"0", "false", "no"}:
+    SMOKE_TEST = False
+else:
+    SMOKE_TEST = _SMOKE_DEFAULT
 
 DATA_PATH = Path("data/features/tft_features.csv")
 MODEL_DIR = Path("models")
@@ -441,7 +482,8 @@ def run_eval(model, loader, criterion, device):
 # ══════════════════════════════════════════════════════════════════════════
 
 timestamp = datetime.now().strftime("%Y%m%d_%H%M")
-run_name = f"{'smoke' if SMOKE_TEST else 'full'}_cnnlstm_v2_{timestamp}"
+seed_tag = f"_seed{SEED}" if SEED is not None else ""
+run_name = f"{'smoke' if SMOKE_TEST else 'full'}_cnnlstm_v2_{timestamp}{seed_tag}"
 mpath = MODEL_DIR / f"cnn_lstm_v2_{run_name}_best.pt"
 
 best_loss = float("inf")
@@ -568,6 +610,7 @@ print(f"  DOWN accuracy = {tdn:.1f}%")
 res = {
     "model": "CNN-LSTM-v2",
     "run_name": run_name,
+    "seed": SEED,
     "smoke_test": SMOKE_TEST,
     "best_val_loss": round(best_loss, 4),
     "best_val_acc": round(best_acc, 2),
