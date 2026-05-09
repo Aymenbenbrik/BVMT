@@ -36,7 +36,7 @@
 \maketitle
 
 \begin{abstract}
-Financial AI systems are predominantly designed and evaluated on liquid, developed markets. Thin, illiquid emerging markets present distinct challenges: heterogeneous feature scales across stocks, sparse volume signals, limited temporal coverage, and no public benchmarks. This paper presents a seven-agent architecture combining Temporal Fusion Transformers, XGBoost fundamental analysis, multilingual NLP sentiment scoring, Graph Attention Networks, and explainable AI components. The system is designed, trained, and evaluated on a real emerging market dataset spanning 10 years (2016--2025) with 68 stocks and 116,626 trading records. The Temporal Fusion Transformer achieves 77.4\% directional accuracy on unseen 2025 test data, representing a 25.5\% improvement over the random baseline. An empirical ablation study across four CNN-LSTM configurations establishes an architectural ceiling of 53.8\%, revealing that convolutional approaches are fundamentally unsuited to heterogeneous financial feature matrices. Per-stock target normalization combined with per-encoder-window feature scaling and confidence-gated agent isolation provide robustness against data poisoning in thin markets. The architecture satisfies EU AI Act transparency requirements through integrated explainability and produces an auditable decision trace for regulatory compliance. This work demonstrates that attention-based architectures with variable selection networks outperform conventional convolutional-recurrent models on emerging market data, and that multi-agent systems with adaptive weighting can maintain prediction quality under heterogeneous market conditions.
+Financial AI systems are predominantly designed and evaluated on liquid, developed markets. Thin, illiquid emerging markets present distinct challenges: heterogeneous feature scales across stocks, sparse volume signals, limited temporal coverage, and no public benchmarks. This paper presents a seven-agent architecture combining Temporal Fusion Transformers, XGBoost fundamental analysis, multilingual NLP sentiment scoring, Graph Attention Networks, and explainable AI components. The system is designed, trained, and evaluated on a real emerging market dataset spanning 10 years (2016--2025) with 68 stocks and 116,626 trading records. The Temporal Fusion Transformer achieves 77.4\% directional accuracy on the unseen 2025 test set ($N_{\mathrm{test}}=10{,}314$, 43 of 68 tickers, 241 trading days), representing a $+19.3$ percentage-point lift over the always-DOWN majority-class baseline (58.1\%) that is appropriate for this bearish-biased market. An empirical ablation study across four CNN-LSTM configurations establishes an architectural ceiling of 53.8\%, suggesting that convolutional approaches struggle on heterogeneous financial feature matrices. Per-stock target normalization combined with per-encoder-window feature scaling and confidence-gated agent isolation provide robustness against data poisoning in thin markets. The architecture is designed to support the transparency and auditability requirements of the EU AI Act through integrated explainability and an auditable decision trace; full regulatory conformity additionally requires governance, risk management, and post-market monitoring beyond the technical scope of this paper. This work demonstrates that attention-based architectures with variable selection networks outperform conventional convolutional-recurrent models on emerging market data, and that multi-agent systems with adaptive weighting can maintain prediction quality under heterogeneous market conditions.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -71,7 +71,7 @@ The Tunisian stock exchange (BVMT) serves as a representative testbed for these 
 \item News predominantly in French and Arabic with domain-specific terminology not well-represented in general-purpose language models
 \end{itemize}
 
-This market presents both challenges and opportunities. The absence of existing AI systems means the research contribution is not merely an incremental improvement to a known system, but rather the first rigorous scientific evaluation of multi-agent AI architectures on such a market.
+This market presents both challenges and opportunities. To the best of our knowledge --- after a systematic search of IEEE Xplore, ACM Digital Library, arXiv, SSRN and Google Scholar restricted to the keywords \{BVMT, Tunis Stock Exchange, North African equity forecasting\} as of January 2026 --- no peer-reviewed deep-learning system has been published on BVMT-listed equities. The research contribution is therefore not an incremental improvement to a known system, but rather the first rigorous scientific evaluation of multi-agent AI architectures on this market. We invite community pointers to any earlier work we may have missed.
 
 \subsection{Research Contributions}
 
@@ -86,12 +86,13 @@ This paper makes the following contributions:
 
 \item \textbf{Explainability framework satisfying EU AI Act requirements}: An integrated XAI layer producing SHAP-based feature importance, attention weight extraction, and plain-language decision explanations that satisfy Articles 13 and 14 of the EU AI Act (2024) transparency requirements for high-risk AI in finance.
 
-\item \textbf{Graph-based market surveillance framework}: A framework for detecting anomalous stock decoupling using rolling correlation networks, with application to market integrity monitoring and insider trading detection.
 \end{enumerate}
+
+A sketch of how the same correlation infrastructure could be repurposed for market surveillance (anomalous stock decoupling, potential insider-trading early warnings) is outlined as future work in Section~\ref{sec:conclusion}; we do not claim it as a primary contribution because it has not been validated against documented BVMT events in the present study.
 
 \subsection{Paper Organization}
 
-The remainder of this paper is structured as follows. Section~\ref{sec:related} reviews related work on temporal models for financial forecasting, CNN-LSTM hybrid architectures, multi-agent systems in finance, explainable AI for financial compliance, graph neural networks for market structure analysis, and NLP for non-English financial markets. Section~\ref{sec:architecture} presents the seven-agent system architecture and describes agent communication protocols, failure isolation, adaptive weight matrices, and confidence gating mechanisms. Section~\ref{sec:methodology} details the dataset construction, feature engineering process, TFT model configuration including the Variable Selection Network formulation, walk-forward validation protocol, and CNN-LSTM comparison architecture. Section~\ref{sec:experiments} presents experimental results including CNN-LSTM ablation studies, TFT version progression, and literature context. Section~\ref{sec:results} discusses the 77.4\% directional accuracy result, interprets the 25.5\% improvement over baseline in the context of market class imbalance, presents information-theoretic analysis of loss improvements, and discusses quantile regression uncertainty quantification. Section~\ref{sec:security} presents security and privacy implications including adversarial robustness in thin markets, XAI as audit trails, agent trust and isolation properties, and graph-based market surveillance applications. Section~\ref{sec:conclusion} concludes with limitations and future work.
+The remainder of this paper is structured as follows. Section~\ref{sec:related} reviews related work on temporal models for financial forecasting, CNN-LSTM hybrid architectures, multi-agent systems in finance, explainable AI for financial compliance, graph neural networks for market structure analysis, and NLP for non-English financial markets. Section~\ref{sec:architecture} presents the seven-agent system architecture and describes agent communication protocols, failure isolation, adaptive weight matrices, and confidence gating mechanisms. Section~\ref{sec:methodology} details the dataset construction, feature engineering process, TFT model configuration including the Variable Selection Network formulation, walk-forward validation protocol, and CNN-LSTM comparison architecture. Section~\ref{sec:experiments} presents experimental results including CNN-LSTM ablation studies and TFT version progression. Section~\ref{sec:results} contextualizes the 77.4\% directional accuracy against the always-DOWN majority baseline, distinguishes the BCE and pinball loss regimes used in v1 and v3, and discusses quantile uncertainty quantification. Section~\ref{sec:security} presents the security and privacy implications, including adversarial robustness in thin markets, XAI as an audit-trail building block, and agent trust and isolation properties. Section~\ref{sec:conclusion} concludes with limitations and future work, where a correlation-based market-surveillance extension is outlined.
 
 \section{Related Work}\label{sec:related}
 
@@ -143,7 +144,7 @@ Explainability in this context requires three properties (Lipton, 2016; Müller 
 \item \textbf{Selectivity}: explanations must focus on the most relevant factors, not enumerate all contributing signals
 \end{itemize}
 
-SHAP (Lundberg and Lee, 2017) provides model-agnostic explanations through coalition-based value allocation. SHAP values satisfy the three properties above, making them suitable for regulatory compliance. This paper integrates SHAP for XGBoost explainability (fundamental analysis) and attention weight extraction for TFT explainability (technical analysis), producing decision traces that satisfy these requirements.
+SHAP (Lundberg and Lee, 2017) provides model-agnostic explanations through coalition-based value allocation rooted in cooperative game theory. SHAP values are widely adopted as feature attributions in financial ML pipelines and offer a principled selectivity mechanism. We do not claim that SHAP fully resolves faithfulness or stability: subsequent work has documented attribution instability under perturbation (Alvarez-Melis and Jaakkola, 2018), adversarial fooling of post-hoc explainers (Slack et al., 2020), and the gap between Shapley attributions and causal explanations (Kumar et al., 2020). This paper integrates SHAP for XGBoost explainability (fundamental analysis) and attention weight extraction for TFT explainability (technical analysis); the resulting decision traces are designed to \emph{support} the auditability requirements of EU AI Act Articles 13--14, while acknowledging that full conformity also depends on governance, post-market monitoring, and independent validation that lie outside the scope of this technical contribution.
 
 \subsection{Graph Neural Networks for Market Structure}
 
@@ -314,7 +315,7 @@ The dataset was constructed from five sources: historical prices, computed techn
 
 \begin{table}[htbp]
 \centering
-\caption{Dataset statistics: sources, row counts, and temporal coverage}
+\caption{Dataset statistics: raw row counts in the source PostgreSQL tables, post-cleaning counts in the released feature file, and temporal coverage. The training pipeline (\texttt{training/train\_tft\_v3.py}) consumes the post-cleaning rows; the gap between raw and post-cleaning is explained by the corrections listed below the table.}
 \label{tab:dataset}
 \scriptsize
 \setlength{\tabcolsep}{3pt}
@@ -322,11 +323,16 @@ The dataset was constructed from five sources: historical prices, computed techn
 \toprule
 \textbf{Table} & \textbf{Rows} & \textbf{Period} & \textbf{Stocks} & \textbf{Notes} \\
 \midrule
-daily\_prices & 116,626 & 2016--2025 & 68 & All ISINs normalized \\
-computed\_indicators & 114,365 & 2016--2025 & 68 & MA5/20/50, RSI, Vol \\
-news\_articles & 7,937 & 2016--2026 & 68 & ilboursa.com, FR+AR \\
-financial\_statements & 350+ & 2016--2024 & 68 & PDF-extracted CMF \\
-financial\_ratios & 261 & 2016--2024 & 68 & Bank/Ins/Non-bank \\
+daily\_prices (raw)             & 116{,}626 & 2016--2025 & 68 & All ISINs normalized \\
+computed\_indicators            & 114{,}365 & 2016--2025 & 68 & MA5/20/50, RSI, Vol \\
+\textit{tft\_features.csv (post-cleaning)} & \textbf{105{,}191} & 2016--2025 & 68 & Fed to TFT v3 training \\
+\hspace{1em}of which Train (date $<$ 2024-01-01) & 84{,}648  & 2016--2023 & 68 & 80.5\% of post-clean \\
+\hspace{1em}of which Val   (2024)               & 10{,}228  & 2024       & --- & 9.7\%  \\
+\hspace{1em}of which Test  (date $\geq$ 2025-01-01) & 10{,}314 & 2025-01-02--2025-12-22 & 43 & 9.8\%, 25 tickers absent in 2025 \\
+\midrule
+news\_articles                  & 7{,}937   & 2016--2026 & 68 & ilboursa.com, FR+AR \\
+financial\_statements           & 350+      & 2016--2024 & 68 & PDF-extracted CMF \\
+financial\_ratios               & 261       & 2016--2024 & 68 & Bank/Ins/Non-bank \\
 \bottomrule
 \end{tabular}
 \normalsize
@@ -650,7 +656,7 @@ The v1 entry consolidates the development iterations recorded under \texttt{ligh
 \label{fig:model_comparison}
 \end{figure}
 
-TFT v3 achieves 77.4\% directional accuracy on the unseen 2025 test set, compared to 53.8\% for CNN-LSTM best run. This 23.6 percentage point absolute improvement represents a 54.8\% relative improvement over the random baseline and establishes attention-based architectures with variable selection as superior to convolutional approaches on emerging market data.
+TFT v3 achieves 77.4\% directional accuracy on the unseen 2025 test set, compared to 53.8\% for CNN-LSTM best run. The 2025 test set contains $N_{\mathrm{test}} = 10{,}314$ row-level predictions over 241 trading days and 43 of the 68 tickers (the remaining 25 tickers had no actively trading days in 2025 in the cleaned dataset; this gap is acknowledged as a coverage limitation in Section~\ref{sec:conclusion}). The 23.6 percentage point absolute improvement over CNN-LSTM is consistent across all CNN-LSTM hyperparameter configurations evaluated; statistical significance versus the always-DOWN baseline (Table~\ref{tab:baselines}) and per-stock performance are reported in Phase~1 of the improvement plan once the competitive baselines are trained.
 
 \section{Results and Discussion}\label{sec:results}
 
@@ -745,17 +751,9 @@ The multi-agent architecture implements fine-grained trust boundaries:
 
 \textbf{Defense}: Confidence gating (Eq.~\ref{eq:confidence_gate}) reduces the SentimentAgent's weight when confidence is below threshold. Even a maximally adversarial sentiment signal (score = $-1.0$) cannot dominate the final decision because its weight is bounded by confidence-gated allocation (maximum 0.27 for any company type). If the attacker injects enough false news to force high confidence, they are attacking the data source (news feed), not the model.
 
-\subsection{Graph-Based Market Surveillance}
-
-\textbf{Anomaly detection}: Define normal behavior as historical correlation between stocks. Define anomalous decoupling: when the rolling 60-day correlation between two historically correlated stocks ($r > 0.7$) drops below 0.4 within a 10-day window.
-
-This pattern may indicate information asymmetry — one party has material non-public information and is positioning accordingly. The correlation breakdown precedes price divergence, providing early detection.
-
-\textbf{Application}: This system detects current correlations but could be extended to detect anomalous decoupling in real time, providing a market integrity monitoring layer. This has direct application to financial regulatory bodies monitoring for insider trading and market manipulation.
-
 \section{Conclusion}\label{sec:conclusion}
 
-This paper presents a multi-agent architecture for stock market analysis designed and evaluated on a thin, illiquid emerging market over a decade of real data. The work makes five contributions: (1) TFT adaptation for thin markets achieving 77.4\% directional accuracy, (2) empirical architectural evaluation establishing CNN-LSTM's 53.8\% ceiling, (3) multi-agent ensemble with failure isolation, (4) EU AI Act-compliant explainability framework, and (5) graph-based market surveillance capabilities.
+This paper presents a multi-agent architecture for stock market analysis designed and evaluated on a thin, illiquid emerging market over a decade of real data. The work makes four contributions: (1) TFT adaptation for thin markets achieving 77.4\% directional accuracy, (2) empirical architectural evaluation establishing CNN-LSTM's 53.8\% ceiling, (3) multi-agent ensemble with failure isolation, and (4) EU AI Act-aligned explainability framework. A correlation-based market-surveillance application of the GraphAgent infrastructure is sketched as future work in Section~\ref{sec:future_work} but is not validated empirically here.
 
 \subsection{Limitations}
 
@@ -773,11 +771,13 @@ Key limitations should be acknowledged:
 \item \textbf{Generalization}: Model training and evaluation use only BVMT data. Generalization to other emerging markets or developed markets has not been validated.
 \end{itemize}
 
-\subsection{Future Work}
+\subsection{Future Work}\label{sec:future_work}
 
 Planned extensions include:
 
 \begin{itemize}
+\item \textbf{Graph-based market surveillance}: The same correlation infrastructure used by the GraphAgent can in principle support an anomaly detector for sudden decoupling between historically correlated stocks (e.g.\ a 60-day rolling correlation that drops from $r > 0.7$ to below $0.4$ within a 10-day window), which may precede price divergence around insider-relevant events. A rigorous evaluation against documented BVMT corporate events --- with precision, recall, and lead time relative to public announcements --- is needed before this can be claimed as a contribution; we list it here as a deliberate forward-looking item.
+
 \item \textbf{Graph enhancement}: Extend the current GAT stack with temporal edge learning and dynamic graph refinement beyond the fixed Pearson-correlation structure. This addresses the limitation that static correlations miss non-monotonic and time-varying dependencies.
 
 \item \textbf{Arabic NLP}: Integrate an Arabic financial sentiment model to improve coverage from 85\% to 100\% of the news corpus. Current coverage is limited to French articles.
