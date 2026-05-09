@@ -230,15 +230,25 @@ df['_future_close'] = (
       .transform(lambda x: x.shift(-MAX_PREDICTION_LENGTH))
 )
 
+# Capture the target's calendar date alongside the target value. We compute
+# this BEFORE the NaN cleanup so the row whose target row is missing also
+# gets NaT here and is dropped in the same step. Section 5b below uses
+# this column to detect split-boundary leakage.
+df['_target_date'] = (
+    df.groupby('ticker_id')['date']
+      .transform(lambda s: s.shift(-MAX_PREDICTION_LENGTH))
+)
+
 # Compute fractional return
 df['future_return_7d'] = (
     (df['_future_close'] - df['close_price']) /
     df['close_price'].replace(0, np.nan)
 ).fillna(np.nan)
 
-# Drop rows where future is unavailable (last 7 rows per stock)
+# Drop rows where future is unavailable (last 7 rows per stock).
+# Same drop also removes NaT rows from _target_date by construction.
 rows_before = len(df)
-df = df.dropna(subset=['future_return_7d']).reset_index(drop=True)
+df = df.dropna(subset=['future_return_7d', '_target_date']).reset_index(drop=True)
 print(f"  Dropped {rows_before - len(df):,} rows (last {MAX_PREDICTION_LENGTH} per stock — expected)")
 
 # Clip outliers
@@ -294,6 +304,64 @@ if 'volume_spike' not in df.columns:
     df['volume_spike'] = (
         df['volume'] / df['volume_ma_20'].replace(0, np.nan)
     ).fillna(1.0).clip(0.0, 10.0).astype('float32')
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# SECTION 5b — ANTI-LEAK: drop split-boundary rows
+#
+# Rationale:
+#   future_return_7d at row t was computed as a positional row-shift of
+#   close_price by MAX_PREDICTION_LENGTH=7. Naively splitting on the row's
+#   own date keeps the last 7 rows of each split with a target borrowed
+#   from the next split's prices:
+#     end of train (Dec 2023) -> target uses val prices (early Jan 2024)
+#     end of val   (Dec 2024) -> target uses test prices (early Jan 2025)
+#   This is silent label leakage and undermines the walk-forward protocol
+#   claim in the IEEE article.
+#
+# Magnitude (typical):
+#   ~7 rows/stock x 68 stocks x 2 boundaries ~= 950 rows (~0.9% of df).
+#
+# Effect on encoder context:
+#   Dropped rows are no longer available as encoder inputs for samples
+#   whose 30-day window straddles the boundary. With
+#   allow_missing_timesteps=True and min_encoder_length=15, the resulting
+#   7-row gap is tolerated.
+# ══════════════════════════════════════════════════════════════════════════
+
+print("\nAnti-leak: dropping split-boundary rows...")
+
+# _target_date was computed alongside _future_close in Section 4 and any
+# NaT rows were dropped together with NaN future_return_7d. Reassert the
+# invariant so a future refactor that breaks the order is caught here.
+assert '_target_date' in df.columns and df['_target_date'].notna().all(), (
+    "Section 5b expects _target_date to be populated by Section 4 and "
+    "free of NaT after the future_return_7d cleanup."
+)
+
+train_end_ts = pd.to_datetime(TRAIN_END)
+val_end_ts   = pd.to_datetime(VAL_END)
+
+mask_train_leak = (df['date'] < train_end_ts) & (df['_target_date'] >= train_end_ts)
+mask_val_leak   = (
+    (df['date'] >= train_end_ts)
+    & (df['date'] < val_end_ts)
+    & (df['_target_date'] >= val_end_ts)
+)
+
+n_train_leak = int(mask_train_leak.sum())
+n_val_leak   = int(mask_val_leak.sum())
+total_leak   = n_train_leak + n_val_leak
+rows_before  = len(df)
+
+print(f"  Train-side boundary leak rows : {n_train_leak:,}")
+print(f"  Val-side   boundary leak rows : {n_val_leak:,}")
+pct_str = f"{100 * total_leak / rows_before:.2f}%" if rows_before else "0%"
+print(f"  Total dropped                 : {total_leak:,} ({pct_str} of df)")
+
+df = df[~(mask_train_leak | mask_val_leak)].reset_index(drop=True)
+df = df.drop(columns=['_target_date'])
+print(f"  Rows after anti-leak          : {len(df):,}")
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -395,6 +463,70 @@ validation_dataset = TimeSeriesDataSet.from_dataset(
 
 print(f"Train samples : {len(training_dataset):,}")
 print(f"Val samples   : {len(validation_dataset):,}")
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# ANTI-LEAK CHECK — log every scaler attached to TimeSeriesDataSet
+#
+# pytorch_forecasting picks a default scaler per feature when no explicit
+# scalers={...} is passed. Different scaler classes have different leak
+# profiles:
+#
+#   GroupNormalizer       — fits per-group mean/std on the data passed at
+#                           construction time. Safe IFF that data is the
+#                           train split (which is the case here, line ~454).
+#   EncoderNormalizer     — refits inside each encoder window at iteration
+#                           time. Causal by construction.
+#   TorchNormalizer       — global mean/std over the data passed at
+#                           construction. Same caveat as GroupNormalizer.
+#   StandardScaler / etc. — sklearn-style; if shared across train and val
+#                           via from_dataset() it stays frozen on train.
+#
+# Logging the actual class lets a future reviewer confirm the article's
+# normalization claims and catch silent regressions if defaults change.
+# Anything other than the four expected classes is flagged as "unknown".
+# ══════════════════════════════════════════════════════════════════════════
+
+def _classify_scaler(scaler_obj) -> str:
+    """Return a short causal-safety tag for a fitted scaler instance."""
+    cls_name = type(scaler_obj).__name__
+    causal = {
+        "GroupNormalizer": "[OK] static, fitted on train",
+        "EncoderNormalizer": "[OK] per-encoder-window (causal)",
+        "TorchNormalizer": "[OK] static, fitted on train",
+        "StandardScaler": "[OK] static, fitted on train",
+        "MultiNormalizer": "[OK] composite (inspect inner)",
+        "NaNLabelEncoder": "[OK] categorical encoder (no stats leak)",
+    }
+    if cls_name in causal:
+        return f"{cls_name:<22} {causal[cls_name]}"
+    return f"{cls_name:<22} [WARN] unknown scaler class — review for leakage"
+
+
+print("\n" + "=" * 70)
+print("ANTI-LEAK CHECK: scalers attached to TimeSeriesDataSet")
+print("=" * 70)
+
+print(f"\nTarget normalizer       : {type(training_dataset.target_normalizer).__name__}")
+tn = training_dataset.target_normalizer
+if hasattr(tn, "groups"):
+    print(f"  groups                : {getattr(tn, 'groups', None)}")
+if hasattr(tn, "transformation"):
+    print(f"  transformation        : {getattr(tn, 'transformation', None)}")
+print(f"  fitted on             : train_clean only (validation_dataset uses from_dataset)")
+
+scalers = getattr(training_dataset, "scalers", {}) or {}
+print(f"\nFeature scalers ({len(scalers)} entries):")
+for feat in sorted(scalers.keys()):
+    print(f"  {feat:<28} -> {_classify_scaler(scalers[feat])}")
+
+print(f"\nFlags that affect what the model sees:")
+print(f"  add_relative_time_idx   : {getattr(training_dataset, 'add_relative_time_idx', None)}")
+print(f"  add_target_scales       : {getattr(training_dataset, 'add_target_scales', None)}")
+print(f"  add_encoder_length      : {getattr(training_dataset, 'add_encoder_length', None)}")
+print(f"  allow_missing_timesteps : {getattr(training_dataset, 'allow_missing_timesteps', None)}")
+print("=" * 70 + "\n")
+
 
 train_loader = training_dataset.to_dataloader(
     train=True, batch_size=BATCH_SIZE, num_workers=0)

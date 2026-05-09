@@ -5,7 +5,19 @@
       "Bash(git ls-remote *)",
       "Bash(curl *)",
       "Bash(git init *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git remote *)",
+      "Bash(git push *)",
+      "Bash(mkdir *)",
+      "Bash(git mv *)",
+      "Bash(mv \"bvmt_multiagent_ieee_article.tex\" paper/)",
+      "Bash(mv \"Multi_Agent_Financial_Intelligence_on_Thin_Markets.pdf\" paper/)",
+      "Bash(mv \"A faire\" paper/)",
+      "Bash(python -c \"import ast; ast.parse\\(open\\('agents/fundamental_agent.py', encoding='utf-8'\\).read\\(\\)\\); ast.parse\\(open\\('agents/orchestrator.py', encoding='utf-8'\\).read\\(\\)\\); ast.parse\\(open\\('agents/agent_state.py', encoding='utf-8'\\).read\\(\\)\\); print\\('OK: 3 files parse cleanly'\\)\")",
+      "Bash(python -c ' *)",
+      "Bash(python -c \"import pytest, sklearn, pandas; print\\(pytest.__version__, sklearn.__version__, pandas.__version__\\)\")",
+      "Bash(python -m pytest tests/test_no_leakage.py -q)"
     ]
   }
 }

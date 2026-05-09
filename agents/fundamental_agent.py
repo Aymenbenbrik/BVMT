@@ -19,8 +19,9 @@ import pickle
 import sys
 import time
 from dataclasses import dataclass
+from datetime import date, datetime
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -35,6 +36,43 @@ ENCODER_PATH = Path("models/fundamental_label_encoder.pkl")
 FEATURE_PATH = Path("models/fundamental_features.json")
 
 HEALTH_LABELS = ["CRITICAL", "WEAK", "MODERATE", "STRONG"]
+
+# Conservative proxy for BVMT publication delay: annual reports are filed
+# with the CMF within 4 months after fiscal year end. Until a real
+# publication_date column exists in financial_ratios, we use
+# (period_end_date + PUBLICATION_LAG_MONTHS months) as the earliest date
+# at which a ratio row is "as-if-known" to a model. This avoids feeding
+# back-tested predictions ratios that did not yet exist on the requested
+# prediction date.
+PUBLICATION_LAG_MONTHS = 4
+
+PredictionDateLike = Union[str, date, datetime, None]
+
+
+def _coerce_prediction_date(prediction_date: PredictionDateLike) -> date:
+    """Normalize prediction_date inputs to a date. Defaults to today (UTC)."""
+    if prediction_date is None or prediction_date == "":
+        return datetime.utcnow().date()
+    if isinstance(prediction_date, datetime):
+        return prediction_date.date()
+    if isinstance(prediction_date, date):
+        return prediction_date
+    if isinstance(prediction_date, str):
+        txt = prediction_date.strip().replace("Z", "+00:00")
+        try:
+            parsed = datetime.fromisoformat(txt)
+            return parsed.date()
+        except ValueError:
+            try:
+                return datetime.strptime(txt, "%Y-%m-%d").date()
+            except ValueError as exc:
+                raise ValueError(
+                    f"Cannot parse prediction_date={prediction_date!r}; "
+                    "expected ISO date (YYYY-MM-DD) or datetime."
+                ) from exc
+    raise TypeError(
+        f"Unsupported prediction_date type: {type(prediction_date).__name__}"
+    )
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -101,8 +139,16 @@ def _query_latest_ratios(
     period_pattern: Optional[str],
     min_conf: float,
     require_size_proxy: bool = True,
+    prediction_date: Optional[date] = None,
+    publication_lag_months: int = PUBLICATION_LAG_MONTHS,
 ) -> Optional[pd.Series]:
-    """Query financial_ratios with tolerant ticker/isin matching and fallback knobs."""
+    """Query financial_ratios with tolerant ticker/isin matching and fallback knobs.
+
+    Anti-leak filter: a row is only eligible when its proxy publication date
+    (period_end_date + publication_lag_months) is on or before
+    prediction_date. When prediction_date is None, no temporal filter is
+    applied (legacy behavior, only safe at live inference time).
+    """
     df = pd.read_sql(
         """
         SELECT
@@ -127,7 +173,12 @@ def _query_latest_ratios(
         )
           AND (%(period_pattern)s IS NULL OR period LIKE %(period_pattern)s)
           AND extraction_confidence >= %(min_conf)s
-                    AND (%(require_size_proxy)s = FALSE OR log_total_assets IS NOT NULL)
+          AND (%(require_size_proxy)s = FALSE OR log_total_assets IS NOT NULL)
+          AND (
+                %(prediction_date)s IS NULL
+                OR (period_end_date + (%(publication_lag_months)s || ' months')::interval)::date
+                       <= %(prediction_date)s
+              )
         ORDER BY match_rank DESC, period_end_date DESC
         LIMIT 1
         """,
@@ -137,20 +188,34 @@ def _query_latest_ratios(
             "period_pattern": period_pattern,
             "min_conf": min_conf,
             "require_size_proxy": require_size_proxy,
+            "prediction_date": prediction_date,
+            "publication_lag_months": publication_lag_months,
         },
     )
     return None if df.empty else df.iloc[0]
 
 
-def fetch_latest_ratios(ticker: str) -> tuple[Optional[pd.Series], str]:
+def fetch_latest_ratios(
+    ticker: str,
+    prediction_date: PredictionDateLike = None,
+    publication_lag_months: int = PUBLICATION_LAG_MONTHS,
+) -> tuple[Optional[pd.Series], str]:
     """
     Fetch latest financial_ratios record with staged fallback.
+
+    Args:
+        ticker: stock ticker or ISIN.
+        prediction_date: only ratio rows whose proxy publication date
+            (period_end_date + publication_lag_months) is <= prediction_date
+            are eligible. None = today (live use).
+        publication_lag_months: BVMT regulatory filing delay proxy.
 
     Returns:
       (row, source_stage)
       - row is None when nothing is found
       - source_stage explains which query path succeeded/failed
     """
+    pd_date = _coerce_prediction_date(prediction_date)
     conn = get_conn()
     try:
         stages: list[tuple[str, Optional[str], float, bool]] = [
@@ -167,6 +232,8 @@ def fetch_latest_ratios(ticker: str) -> tuple[Optional[pd.Series], str]:
                 period_pattern,
                 min_conf,
                 require_size_proxy=require_size_proxy,
+                prediction_date=pd_date,
+                publication_lag_months=publication_lag_months,
             )
             if row is not None:
                 return row, stage_name
@@ -302,13 +369,25 @@ class FundamentalAgent:
             error=error_msg,
         )
 
-    async def run(self, ticker: str) -> FundamentalSignal:
+    async def run(
+        self,
+        ticker: str,
+        prediction_date: PredictionDateLike = None,
+    ) -> FundamentalSignal:
         """
         Main entry point called by OrchestratorAgent.
 
+        Args:
+            ticker: stock ticker or ISIN.
+            prediction_date: point-in-time anchor. Ratios whose proxy
+                publication date is after this anchor are excluded. None
+                defaults to today (correct for live inference; back-tests
+                MUST pass the historical prediction date to avoid leakage).
+
         Steps:
           1. Load XGBoost model (first call only)
-          2. Query most recent FY record from financial_ratios
+          2. Query most recent FY record from financial_ratios that was
+             "as-if-known" on prediction_date
           3. Build feature vector (17 features)
           4. XGBoost predict_proba → health class + confidence
           5. Return FundamentalSignal
@@ -316,7 +395,11 @@ class FundamentalAgent:
         Returns FundamentalSignal with error set if anything fails.
         OrchestratorAgent checks signal.is_valid() before using it.
         """
-        log.info(f"FundamentalAgent.run() → {ticker}")
+        pd_date = _coerce_prediction_date(prediction_date)
+        log.info(
+            f"FundamentalAgent.run() → {ticker} "
+            f"(as_of={pd_date.isoformat()}, lag={PUBLICATION_LAG_MONTHS}m)"
+        )
         t0 = time.perf_counter()
 
         # Step 1: Load model
@@ -327,7 +410,10 @@ class FundamentalAgent:
 
         # Step 2: Query financial_ratios
         try:
-            row, source_stage = fetch_latest_ratios(ticker)
+            row, source_stage = fetch_latest_ratios(
+                ticker,
+                prediction_date=pd_date,
+            )
         except Exception as e:
             return self._make_error_signal(ticker, f"DB error: {e}")
 

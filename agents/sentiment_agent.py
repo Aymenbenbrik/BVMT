@@ -88,7 +88,14 @@ class SentimentAgent(BaseAgent):
             window_days,
         )
 
-    async def _fetch_latest_scored_timestamp(self, state: AgentState) -> datetime | None:
+    async def _fetch_latest_scored_timestamp(
+        self,
+        state: AgentState,
+        upper_bound_ts: datetime,
+    ) -> datetime | None:
+        # Anti-leak: cap MAX(published_at) at the prediction-time anchor so
+        # back-tested calls never see articles published after the date
+        # they are evaluating.
         rows = await self.query_db(
             '''
             SELECT MAX(published_at) AS latest_at
@@ -100,16 +107,26 @@ class SentimentAgent(BaseAgent):
                                  OR REPLACE(UPPER(ticker), ' ', '') = REPLACE(UPPER($1), ' ', '')
                                     )
               AND sentiment_label IS NOT NULL
+              AND published_at <= $3
             ''',
             state.ticker,
                         (state.isin_code or ''),
+            upper_bound_ts,
         )
         if not rows:
             return None
         latest = rows[0].get('latest_at')
         return latest if isinstance(latest, datetime) else None
 
-    async def _fetch_latest_rows_without_window(self, state: AgentState, limit_rows: int = 30):
+    async def _fetch_latest_rows_without_window(
+        self,
+        state: AgentState,
+        upper_bound_ts: datetime,
+        limit_rows: int = 30,
+    ):
+        # Anti-leak: same cap as _fetch_latest_scored_timestamp. Without
+        # this filter the final fallback would happily return tomorrow's
+        # articles when back-testing a 2023 prediction.
         return await self.query_db(
             '''
             SELECT sentiment_score,
@@ -123,11 +140,13 @@ class SentimentAgent(BaseAgent):
                  OR REPLACE(UPPER(ticker), ' ', '') = REPLACE(UPPER($1), ' ', '')
                   )
               AND sentiment_label IS NOT NULL
+              AND published_at <= $3
             ORDER BY published_at DESC NULLS LAST
-            LIMIT $3
+            LIMIT $4
             ''',
             state.ticker,
             (state.isin_code or ''),
+            upper_bound_ts,
             limit_rows,
         )
 
@@ -157,8 +176,13 @@ class SentimentAgent(BaseAgent):
                     break
 
             # If reference-based windows are empty, anchor on latest scored article.
+            # Anti-leak: pass reference_ts as upper bound so the fallback never
+            # peeks at articles published after the date being evaluated.
             if len(selected_rows) == 0:
-                latest_ts = await self._fetch_latest_scored_timestamp(state)
+                latest_ts = await self._fetch_latest_scored_timestamp(
+                    state,
+                    upper_bound_ts=reference_ts,
+                )
                 if latest_ts is not None:
                     state.log("  No recent rows on reference date; trying latest-article anchor")
                     for win in WINDOW_CANDIDATES:
@@ -175,8 +199,13 @@ class SentimentAgent(BaseAgent):
                             break
 
             # Final fallback for sparse/missing timestamps: use latest available scored rows.
+            # Same anti-leak cap applies.
             if len(selected_rows) == 0:
-                rows = await self._fetch_latest_rows_without_window(state, limit_rows=30)
+                rows = await self._fetch_latest_rows_without_window(
+                    state,
+                    upper_bound_ts=reference_ts,
+                    limit_rows=30,
+                )
                 fallback_path.append(f"latest_any={len(rows)}")
                 if rows:
                     selected_rows = rows

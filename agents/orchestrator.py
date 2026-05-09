@@ -38,14 +38,24 @@ class OrchestratorAgent:
         self.graph_min_confidence = 0.20
         self.graph_min_abs_score = 0.08
 
-    async def run(self, ticker: str, user_role: str = "investor") -> AgentState:
+    async def run(
+        self,
+        ticker: str,
+        user_role: str = "investor",
+        seance: str | None = None,
+    ) -> AgentState:
         state = AgentState(
             ticker=ticker,
             request_id=str(uuid.uuid4())[:8],
             user_role=user_role,
             created_at=datetime.now().isoformat(),
+            seance=(seance or ""),
         )
-        state.log(f"Orchestrator starting for {ticker} (id={state.request_id})")
+        state.log(
+            f"Orchestrator starting for {ticker} (id={state.request_id}"
+            + (f", seance={seance}" if seance else "")
+            + ")"
+        )
 
         state = await self._resolve_identity(state)
 
@@ -78,9 +88,15 @@ class OrchestratorAgent:
 
         # Step 4: run core scalar agents in parallel
         state.log("Step 4: Running TechnicalAgent + FundamentalAgent...")
+        # Propagate state.seance to FundamentalAgent so back-tested calls
+        # only see ratios that were "as-if-known" on that date. Empty
+        # string => live use (FundamentalAgent defaults to today).
         tech_signal, fund_signal = await asyncio.gather(
             self.technical_agent.run(state.ticker),
-            self.fundamental_agent.run(state.ticker),
+            self.fundamental_agent.run(
+                state.ticker,
+                prediction_date=(state.seance or None),
+            ),
         )
 
         state.agent_outputs["technical"] = tech_signal.to_dict()

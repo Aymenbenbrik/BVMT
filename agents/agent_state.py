@@ -19,6 +19,11 @@ class AgentState:
     request_id: str = ""        # unique ID for this analysis run
     user_role: str = "investor" # "investor", "analyst", "admin"
     created_at: str = ""
+    # Point-in-time anchor for back-tests. ISO date or datetime string.
+    # When empty, agents fall back to the live "now". Set explicitly during
+    # historical evaluation so external data (news, financial ratios) is
+    # filtered to information genuinely available on that day.
+    seance: str = ""
 
     # -- Data quality flags (filled by DataAgent) -------------------------
     price_rows_available: int = 0
