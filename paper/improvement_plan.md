@@ -200,13 +200,43 @@ Sur l'ensemble du test 2025 :
 - [ ] Distribution des confidences par agent (histogramme).
 - [ ] Précision conditionnelle : précision **quand** le gating est actif vs **quand** il ne l'est pas.
 
+### Action 2.4 — Apprentissage des poids du multi-agent (réponse à B2)
+
+**Constat** : la version actuelle utilise un vecteur de poids fixe $w^{(0)} = (0.34, 0.26, 0.20, 0.20)$ et un ensemble de règles d'ajustement heuristiques (Table~\ref{tab:weight_adjustments} de l'article) qui n'ont pas été tunées par CV. Une version antérieure du papier prétendait à une matrice par type d'entreprise (banques / assurances / non-banques) qui ne correspondait à aucun chemin de code et a été retirée.
+
+**Procédure d'apprentissage** :
+
+1. **Données** : utiliser le set de validation 2024 (10 228 lignes), exclu du training et du test 2025.
+2. **Espace de recherche** :
+   - Vecteur de base $w^{(0)}_{c} \in \Delta^4$ par type d'entreprise $c \in \{\text{bank, insurance, non-bank, leasing}\}$ ($4 \times 4 = 16$ paramètres dans le simplexe).
+   - Optionnel : 4 paramètres $\alpha$ par règle d'ajustement (donor fraction de la Table~\ref{tab:weight_adjustments}) tunés en commun.
+3. **Méthode** :
+   - **Grid search** grossier ($\Delta = 0{,}05$ sur chaque dimension du simplexe) pour calibrer la maille.
+   - **Bayesian optimization** (TPE, Optuna) pour raffinement, 200 itérations.
+   - **Critère** : précision directionnelle macro-F1 sur 2024, plutôt que accuracy brute, pour pondérer la classe minoritaire (UP).
+4. **Validation hors-échantillon** : appliquer les poids sélectionnés au test 2025, comparer à la baseline $w^{(0)}$ déployée actuellement. Reporter :
+   - Précision avant/après.
+   - p-value (McNemar) sur le différentiel.
+   - Test de robustesse : permuter les labels de validation 100 fois, vérifier que le gain n'est pas dû à du sur-ajustement (gain réel doit être > 95-percentile des gains permutés).
+5. **Garde-fou** : si l'amélioration sur 2025 est < 0,5 pp, **ne pas** modifier les poids déployés ; reporter le résultat négatif honnêtement (le hand-tuning informel a produit des poids déjà proches de l'optimum).
+
+**Livrable** :
+- Code dans `training/learn_weights.py`.
+- Nouvelle table `tab:learned_weights` dans §V de l'article :
+
+| Type entreprise | $w_{\mathrm{tech}}$ | $w_{\mathrm{fund}}$ | $w_{\mathrm{sent}}$ | $w_{\mathrm{graph}}$ | Δ accuracy 2025 |
+|---|---|---|---|---|---|
+
+- Si gain significatif → la table remplace `tab:weight_adjustments`. Sinon, la table reste en annexe avec discussion.
+
 ### Livrable Phase 2
 
 Section nouvelle §V.D « Multi-Agent Ablation Study » avec :
 - Tableau A1–A9.
 - Figure : barplot des accuracy par configuration.
 - Tableau performance par segment.
-- Texte interprétatif.
+- Tableau des poids appris (`tab:learned_weights`).
+- Texte interprétatif intégrant B2 (poids appris vs heuristiques).
 
 ---
 

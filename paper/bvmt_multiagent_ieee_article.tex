@@ -126,7 +126,7 @@ This work distinguishes itself through a key design choice: agents are specializ
 \item \textbf{Trust boundaries}: agents communicate through standardized AgentSignal dataclasses, enabling fine-grained failure isolation
 \end{itemize}
 
-The orchestrator implements adaptive weighting — different agents contribute different proportions to the final signal based on company type (banks vs. non-banks) and real-time confidence scores. This is a form of hierarchical ensemble learning with explicit trust boundaries between components.
+The orchestrator implements adaptive weighting --- agent contributions are rescaled at request time according to data-quality observations on the queried ticker (sparse news, missing recent financials, short price history) and to per-agent confidence scores. The rescaling rules are heuristic and shared across company types in the current implementation; learning of per-company-type and CV-tuned weights is described in Section~\ref{sec:weights} as Phase~2 work. This is a form of hierarchical ensemble learning with explicit trust boundaries between components.
 
 \subsection{Explainable AI for Financial Compliance}
 
@@ -261,32 +261,38 @@ When an agent returns \texttt{error\_flag = True}, the orchestrator redistribute
 
 where $w_i$ is the original weight for agent $i$, $w_{failed}$ is the weight of the failed agent, and $\hat{w}_i$ is the adjusted weight. This ensures the total weight remains 1.0 and functional agents contribute more when peers fail.
 
-\subsection{Adaptive Weight Matrix}
+\subsection{Data-Quality-Driven Weight Adjustment}\label{sec:weights}
 
-The orchestrator maintains separate weight configurations for three company types based on fundamental characteristics:
+The orchestrator starts from a single fixed weight vector and rescales it at request time according to the data quality observed for the queried ticker. Both the base vector and the rescaling rules are heuristic and \emph{not} learned from data; we describe them faithfully and identify learning of these weights as a deliverable of Phase~2 of the improvement plan.
+
+\textbf{Base weights} are stored in \texttt{AgentState.weights} (\texttt{agents/agent\_state.py}):
+\begin{equation}
+w^{(0)} = (w^{(0)}_{\mathrm{tech}}, w^{(0)}_{\mathrm{fund}}, w^{(0)}_{\mathrm{sent}}, w^{(0)}_{\mathrm{graph}}) = (0.34,\, 0.26,\, 0.20,\, 0.20).
+\label{eq:base_weights}
+\end{equation}
+These four values are the same regardless of company type. The orchestrator then mutates $w^{(0)}$ inside \texttt{OrchestratorAgent.\_adjust\_weights} according to three data-quality conditions observed for the request (Table~\ref{tab:weight_adjustments}):
 
 \begin{table}[htbp]
 \centering
-\caption{Adaptive weight matrix: agent contribution proportions by company type}
-\label{tab:weights}
-\begin{tabular}{lcccc}
+\caption{Heuristic weight adjustments applied by \texttt{\_adjust\_weights}. Each rule decreases one weight by a fixed fraction $\alpha$ and redistributes the recovered mass over the remaining agents in the proportions shown. After all triggered rules, the vector is renormalized so that $\sum_a w_a = 1$.}
+\label{tab:weight_adjustments}
+\small
+\begin{tabular}{p{2.6cm}cccc}
 \toprule
-\textbf{Company Type} & \textbf{Technical} & \textbf{Fundamental} & \textbf{Sentiment} & \textbf{Graph} \\
+\textbf{Trigger} & \textbf{Donor} ($\alpha$) & \textbf{Tech} & \textbf{Fund} & \textbf{Sent} \\
 \midrule
-Banks & 0.42 & 0.31 & 0.27 & Gated \\
-Insurance & 0.45 & 0.28 & 0.27 & Gated \\
-Non-banks & 0.59 & 0.16 & 0.27 & Gated \\
+\texttt{news\_count == 0}            & sent ($0.80$) & $+0.50$ & $+0.30$ & --- \\
+$1 \le \texttt{news\_count} < 5$     & sent ($0.55$) & $+0.50$ & $+0.30$ & --- \\
+$\neg\texttt{has\_recent\_financials}$ & fund ($0.50$) & $+0.70$ & --- & --- \\
+\texttt{price\_rows < 252}           & tech ($0.40$) & --- & $+0.35$ & $+0.35$ \\
 \bottomrule
 \end{tabular}
+\normalsize
 \end{table}
 
-\textbf{Rationale}:
-\begin{itemize}
-\item \textbf{Banks}: Basel III regulatory requirements produce rich financial statements (capital ratios, non-performing loan ratios, coverage ratios). Fundamental analysis is highly informative (weight 0.31). Technical signal remains strong (0.42) as price patterns reflect earnings announcements.
-\item \textbf{Insurance}: Similar regulatory environment to banks but with different loss reserves and premium income dynamics. Fundamental weight slightly lower (0.28) as pricing is less directly tied to fundamental metrics.
-\item \textbf{Non-banks}: Limited regulatory reporting. Price is driven more by momentum and sentiment than financial ratios. Technical weight elevated to 0.59 while fundamental drops to 0.16.
-\item \textbf{Graph (all types)}: Gated through confidence scoring. Correlation networks are meaningful only when stocks are trading actively. During high-volatility periods when correlations break down, graph signal is suppressed through confidence-based downweighting (see Eq.~\ref{eq:confidence_gate}).
-\end{itemize}
+\textbf{Rationale of the heuristics}: each rule reduces the weight of an agent whose input is known to be unreliable for the queried ticker (no recent news, no recent financials, very short price history) and redistributes the recovered mass to agents whose inputs remain trustworthy. The donor fractions and redistribution ratios were chosen during development against held-out 2024 data; they have not been formally tuned by cross-validation, and the rule set does not currently differentiate by company type. An earlier draft of this paper presented a per-company-type weight matrix (banks 0.42 / 0.31 / 0.27, non-banks 0.59 / 0.16 / 0.27, etc.) as if learned; that table did not correspond to any code path and has been removed for honesty. Per-company-type and CV-tuned weights are scoped as Phase~2 deliverables (see \texttt{paper/improvement\_plan.md}, Action~2.4).
+
+\textbf{Graph weight}: under no rule is the graph weight increased or decreased through Table~\ref{tab:weight_adjustments}; instead, its contribution is gated through the confidence-gating mechanism described next (Eq.~\ref{eq:confidence_gate}).
 
 \subsection{Confidence Gating}
 
@@ -776,7 +782,7 @@ The multi-agent architecture implements fine-grained trust boundaries:
 
 \textbf{Threat}: A compromised SentimentAgent receives injected false news (e.g., a fabricated negative news article flagged by an attacker). The agent scores this false article as highly negative.
 
-\textbf{Defense}: Confidence gating (Eq.~\ref{eq:confidence_gate}) reduces the SentimentAgent's weight when confidence is below threshold. Even a maximally adversarial sentiment signal (score = $-1.0$) cannot dominate the final decision because its weight is bounded by confidence-gated allocation (maximum 0.27 for any company type). If the attacker injects enough false news to force high confidence, they are attacking the data source (news feed), not the model.
+\textbf{Defense}: Confidence gating (Eq.~\ref{eq:confidence_gate}) reduces the SentimentAgent's weight when confidence is below threshold. Even a maximally adversarial sentiment signal (score $=-1.0$) cannot dominate the final decision because its weight starts at $w^{(0)}_{\mathrm{sent}} = 0.20$ (Eq.~\ref{eq:base_weights}) and only ever increases marginally through the price-coverage redistribution rule of Table~\ref{tab:weight_adjustments} (the sentiment weight remains below $\sim 0.30$ across all data-quality regimes observed on the test set). If the attacker injects enough false news to force high confidence, they are attacking the data source (news feed), not the model.
 
 \section{Conclusion}\label{sec:conclusion}
 
