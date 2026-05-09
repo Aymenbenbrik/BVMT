@@ -815,6 +815,45 @@ $$\text{Prediction interval} = [\hat{Q}_{10}, \hat{Q}_{90}]$$
 
 The width of this interval is asymmetric risk information: wide intervals (high $Q90 - Q10$) indicate uncertain predictions where position sizing should be reduced. Narrow intervals indicate high-confidence predictions. This is particularly valuable for thin markets where liquidity can change rapidly.
 
+\subsection{TFT Internal Ablations}\label{sec:tft_ablations}
+
+The $+24$ to $+27$ pp gap between TFT v3 and every non-TFT baseline (Section~\ref{sec:results}.A) is large enough that mechanism attribution is required: a number that exceeds the most generous prior on what an attention-based model can extract from $60\!\times\!15$-shaped emerging-market windows is, on its own, equally consistent with a genuine architectural advantage and with a residual leak that the Phase~0 audit has not yet caught. The improvement-plan Action~1.4 specifies three internal ablations that, together, partition the candidate explanations along the three components that the v3 introduces or preserves on top of the standard transformer baseline of Section~\ref{sec:results}.A: Variable Selection Network gating, per-stock target normalisation, and confidence gating on the quantile output (Eq.~\ref{eq:quantile_confidence}).
+
+\textbf{Variants}. Each ablation modifies exactly one component of the v3 reference and keeps all other hyperparameters identical (encoder length, hidden size, dropout, learning rate, gradient clip, quantile loss). The implementations live in \texttt{training/tft\_ablations/}:
+\begin{itemize}
+\item \textbf{TFT $-$ VSN}. The three Variable Selection Networks (static, encoder, decoder) keep their per-variable Gated Residual Networks but the softmax-gated weights are replaced by uniform $1/N$ weights. This isolates the \emph{gating} contribution of the VSN from its GRN contribution; a GRN-free ablation would coincide with the standard Transformer baseline already trained in Action~1.3 ($52.26\%$, Table~\ref{tab:baselines}).
+\item \textbf{TFT $-$ per-stock norm}. The target normalizer \texttt{GroupNormalizer(groups=[ticker\_id])} is replaced by a global \texttt{TorchNormalizer} fitted across all 68 tickers. AMEN BANK and a thinly traded mid-cap then share a single $(\mu, \sigma)$. This is the naive baseline against which per-stock normalisation should demonstrate gain.
+\item \textbf{TFT $-$ confidence gating}. The confidence score of Eq.~\ref{eq:quantile_confidence} is computed but \emph{not} used to abstain or down-weight; equivalently, the threshold $\tau$ in the gating decision is set to $0$. This ablation is post-hoc: it reads the per-row predictions of the unmodified v3 checkpoint and sweeps $\tau \in \{0.50, 0.55, 0.60, 0.65, 0.70, 0.75\}$, reporting (coverage, accuracy on covered rows) at each threshold. No re-training is required because gating is an evaluation-time decision rule rather than a training objective; the harness is \texttt{training/tft\_ablations/no\_gating\_eval.py}.
+\end{itemize}
+
+\textbf{Falsifiable hypotheses}. The article makes the gap claim falsifiable by the following decision rule:
+\begin{itemize}
+\item If TFT $-$ VSN drops to within $\pm 2$ pp of the standard Transformer baseline ($52.26\%$), VSN gating accounts for most of the gap.
+\item If TFT $-$ per-stock norm drops by $\geq 10$ pp, per-stock target standardisation accounts for a substantial slice of the gap (this is the prediction supported by the article's discussion of thin-market heterogeneity in Section~\ref{sec:security}.A).
+\item If the confidence-gating sweep shows that accuracy on covered rows is monotone increasing in $\tau$ \emph{and} coverage drops smoothly (no discrete jump), the confidence score is well-calibrated. A flat or non-monotone curve would invalidate the article's confidence-gating defense argument (Section~\ref{sec:security}.A).
+\end{itemize}
+
+\begin{table}[htbp]
+\centering
+\caption{TFT internal-ablation suite. Each row trains the v3 architecture with exactly one component modified versus the reference; all other hyperparameters are held fixed. Metrics are reported on the same 2025 test split as Table~\ref{tab:baselines}. Numerical values in italics will be populated once the four jobs return from Vertex AI Custom Training (\texttt{vertex/submit.py}); the infrastructure is shipped with the article and the smoke-tested local runner (\texttt{training/tft\_ablations/runner.py --smoke}) confirms that all variants instantiate and train without modification of the data path.}
+\label{tab:tft_ablations}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Variant} & \textbf{Component modified} & \textbf{Test acc.} & \textbf{$\Delta$ vs. v3} \\
+\midrule
+TFT v3 (reference)            & ---                                       & $77.4\%$  & ---       \\
+TFT $-$ VSN                   & uniform variable weights                  & \textit{pending} & \textit{pending} \\
+TFT $-$ per-stock norm        & global \texttt{TorchNormalizer}           & \textit{pending} & \textit{pending} \\
+TFT $-$ conf. gating ($\tau\!=\!0$) & post-hoc, all rows kept              & \textit{pending} & \textit{pending} \\
+\bottomrule
+\end{tabular}
+\normalsize
+\end{table}
+
+\textbf{Reproducibility and cost}. The four jobs (one re-trained baseline plus three ablations) run on Google Cloud Vertex AI Custom Training with the released container image (\texttt{vertex/Dockerfile}, \texttt{vertex/cloudbuild.yaml}). On a single NVIDIA T4 the full sweep is $\sim\!\$15$ USD ($\sim\!10$--$12$ h per job, four jobs); on A100 it is $\sim\!\$30$ USD ($\sim\!2$ h per job). The runner accepts \texttt{BVMT\_SEED} so each variant is re-runnable bit-for-bit. Until the cluster sweep returns, the reader should treat the v3 lift over baselines as \emph{consistent with} the VSN-plus-per-stock-norm hypothesis rather than as definitively attributed to it.
+
 \section{Robustness and Auditability Implications}\label{sec:security}
 
 The analyses in this section are \emph{architectural}: we describe threat models, normalization-based defenses, and audit-trail properties that follow from the design choices documented earlier. We do not run end-to-end poisoning experiments and do not claim empirical security guarantees; an empirical adversarial study is listed as a future-work item. The vocabulary ``defense'', ``robustness'' and ``trust boundary'' in the rest of the section is therefore used in the design sense, consistent with how the IEEE Conference on Secure and Trustworthy AI distinguishes design-level from empirical claims.

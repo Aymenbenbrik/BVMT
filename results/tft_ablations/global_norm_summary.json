@@ -1,0 +1,16 @@
+{
+  "variant": "global_norm",
+  "run_name": "tft_global_norm_smoke_20260509_234424",
+  "best_val_loss": 0.013442936353385448,
+  "best_ckpt": "C:\\Users\\aymen\\OneDrive\\Bureau\\recherche\\IEEE\\bvmt-project-main\\bvmt-project-main\\results\\tft_ablations\\models\\tft_global_norm_smoke_20260509_234424_epoch=01_val_loss=0.0134.ckpt",
+  "epochs_trained": 5,
+  "params": 29343,
+  "vsn_patched": 0,
+  "vsn_patched_names": [],
+  "target_normalizer": "TorchNormalizer",
+  "dir_acc_history": [],
+  "best_q50_dir_acc": null,
+  "elapsed_seconds": 8.9,
+  "seed": 0,
+  "smoke": true
+}

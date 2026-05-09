@@ -1,0 +1,42 @@
+# vertex/cloudbuild.yaml — Cloud Build manifest for the training image.
+#
+# Trigger from the repo root so the build context contains data/, training/,
+# agents/, etc. Exposes one substitution: _IMAGE (full Artifact Registry path).
+#
+# Usage:
+#   gcloud builds submit \
+#     --config=vertex/cloudbuild.yaml \
+#     --substitutions=_IMAGE=us-central1-docker.pkg.dev/PROJECT/bvmt/tft-ablations:latest \
+#     .
+#
+# Defaults below assume a us-central1 Artifact Registry repo named "bvmt"
+# inside project ${PROJECT_ID}; override --substitutions to deploy elsewhere.
+
+substitutions:
+  _IMAGE: 'us-central1-docker.pkg.dev/${PROJECT_ID}/bvmt/tft-ablations:latest'
+
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build'
+    args:
+      - 'build'
+      - '-t'
+      - '${_IMAGE}'
+      - '-f'
+      - 'vertex/Dockerfile'
+      - '.'
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push'
+    waitFor: ['build']
+    args: ['push', '${_IMAGE}']
+
+images:
+  - '${_IMAGE}'
+
+options:
+  # Larger machine -> faster image build (the pytorch base is ~5 GB).
+  machineType: 'E2_HIGHCPU_8'
+  diskSizeGb: 100
+  logging: 'CLOUD_LOGGING_ONLY'
+
+timeout: '1800s'

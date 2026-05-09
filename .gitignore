@@ -34,6 +34,11 @@ models/*.pth
 models/*.ckpt
 models/*.pkl
 
+# TFT ablation smoke artefacts (regenerated on Vertex AI; only the
+# *_summary.json files are committed for the article tab:tft_ablations)
+results/tft_ablations/models/
+results/tft_ablations/logs/
+
 # Lightning training runs
 lightning_logs/
 

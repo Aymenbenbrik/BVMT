@@ -1,0 +1,17 @@
+# Vertex AI custom training image — pinned dependencies for the
+# TFT v3 baseline + ablation runs (training/tft_ablations/runner.py).
+#
+# Versions match the local environment used to author Action 1.4 so a
+# Vertex run reproduces the same numerical behaviour bit-for-bit.
+# torch is shipped by the base CUDA image (vertex/Dockerfile) and is
+# NOT installed via pip here.
+
+pytorch-forecasting==1.7.0
+lightning==2.6.1
+pandas>=2.2,<3.1
+numpy>=2.0,<2.5
+scikit-learn>=1.5
+scipy>=1.13
+statsmodels>=0.14
+xgboost>=3.0
+google-cloud-storage>=2.18

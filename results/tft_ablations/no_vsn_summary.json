@@ -1,0 +1,20 @@
+{
+  "variant": "no_vsn",
+  "run_name": "tft_no_vsn_smoke_20260509_234333",
+  "best_val_loss": 0.012794717215001583,
+  "best_ckpt": "C:\\Users\\aymen\\OneDrive\\Bureau\\recherche\\IEEE\\bvmt-project-main\\bvmt-project-main\\results\\tft_ablations\\models\\tft_no_vsn_smoke_20260509_234333_epoch=01_val_loss=0.0128.ckpt",
+  "epochs_trained": 5,
+  "params": 29343,
+  "vsn_patched": 3,
+  "vsn_patched_names": [
+    "static_variable_selection",
+    "encoder_variable_selection",
+    "decoder_variable_selection"
+  ],
+  "target_normalizer": "GroupNormalizer",
+  "dir_acc_history": [],
+  "best_q50_dir_acc": null,
+  "elapsed_seconds": 8.5,
+  "seed": 0,
+  "smoke": true
+}
