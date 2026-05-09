@@ -84,7 +84,7 @@ This paper makes the following contributions:
 
 \item \textbf{Multi-agent ensemble with failure isolation and confidence gating}: A seven-agent architecture implementing agent-level trust boundaries, confidence-gated weight adaptation, and failure isolation. The design provides robustness against data poisoning in thin markets where individual manipulated trades can shift global statistics.
 
-\item \textbf{Explainability framework satisfying EU AI Act requirements}: An integrated XAI layer producing SHAP-based feature importance, attention weight extraction, and plain-language decision explanations that satisfy Articles 13 and 14 of the EU AI Act (2024) transparency requirements for high-risk AI in finance.
+\item \textbf{Explainability framework aligned with EU AI Act transparency requirements}: An integrated XAI layer producing SHAP-based feature importance, attention weight extraction, and plain-language decision explanations \emph{designed to support} the transparency obligations of Articles 13 and 14 of the EU AI Act (2024) for high-risk AI in finance. Full conformity additionally depends on governance, risk management, technical documentation per Annex IV, post-market monitoring, and independent conformity assessment that lie outside the scope of this technical contribution and are listed as deployment work in Section~\ref{sec:security}.B.
 
 \end{enumerate}
 
@@ -885,7 +885,13 @@ The XAI layer maps to specific EU AI Act requirements:
 \item \textbf{Article 17 — Quality Management}: The DataAgent produces a data quality score (0--100) for every prediction. This creates an audit trail: predictions based on low-quality data (e.g., during a suspension day) are flagged, enabling post-hoc analysis of prediction reliability.
 \end{itemize}
 
-These audit trails satisfy regulatory requirements for high-risk AI in finance and enable financial authorities to audit individual predictions retrospectively.
+These audit trails \emph{provide the technical building blocks} for the regulatory-explainability requirements of high-risk financial AI: a per-prediction artefact that an auditor can replay and inspect. They are necessary for, but not by themselves sufficient to establish, conformity. Specifically:
+\begin{itemize}
+\item \textbf{Coverage of the regulatory text is partial}. The XAI layer mapped above (Articles 13, 14, 17) is a strict subset of the EU AI Act obligations for high-risk systems. A non-exhaustive list of obligations \emph{not} addressed by this paper includes the risk-management system of Article 9, the data-governance and bias-management procedures of Article 10, the technical-documentation file of Article 11 and Annex IV, the human-oversight \emph{procedures} (as opposed to the technical capability) of Article 14(3)--(5), the cybersecurity and accuracy requirements of Article 15, the registration and post-market-monitoring duties of Article 72, and where applicable conformity assessment by a notified body under Article 43.
+\item \textbf{Empirical assumptions remain unvalidated.} The audit-trail design assumes that SHAP attributions are faithful and that attention weights are interpretable; the §II.D discussion explicitly disclaims both. Calibration of confidence scores, robustness of explanations under adversarial perturbation (Slack et al., 2020), and stakeholder-comprehensibility studies are required before claiming that the trail is \emph{operationally} useful to a financial regulator, not merely structurally compatible with the regulatory text.
+\item \textbf{Deploying institution carries the residual obligation.} The trail is a build-time deliverable; conformity is a property of the deployed pipeline, which additionally depends on the deploying institution's governance framework, internal model-validation procedures, post-market monitoring of distribution drift, and incident-reporting channels. The present work delivers the technical layer; integration into a compliant operational pipeline is left to deploying institutions and is identified as future work.
+\end{itemize}
+We therefore phrase every regulatory claim in this paper as \emph{aligned with} or \emph{designed to support} the EU AI Act, rather than as ``satisfying'', ``meeting'', or ``conforming to'' it. Reviewers familiar with the high-risk AI conformity-assessment literature will recognise this distinction as the difference between a technical-component contribution and a system-level conformity claim.
 
 \subsection{Agent Trust and Failure Isolation}
 
