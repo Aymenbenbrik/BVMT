@@ -1,0 +1,76 @@
+# .gcloudignore — what NOT to upload into the Cloud Build context
+#
+# The Vertex AI training image (vertex/Dockerfile) only needs:
+#   data/features/ (~30 MB)  — the post-cleaning CSV the runner reads
+#   training/                — the BVMT training scripts
+#   agents/                  — referenced by the Dockerfile COPY
+#   tests/                   — included for in-image leakage check
+#   vertex/                  — Dockerfile + requirements
+#   paper/improvement_plan.md - for in-image documentation
+#
+# Everything else is repo state we should not waste bandwidth or build
+# time on (data/raw/ alone is ~1 GB).
+
+# Git internals
+.git/
+.gitignore
+.gitattributes
+
+# Big data subdirectories the Dockerfile does NOT consume.
+# data/features/ is the only one the runner reads; the rest are
+# upstream sources (raw price scrapes, financial-statement dumps,
+# news scrapes) that produced the features and stay on local disk.
+data/financials/
+data/prices/
+data/raw/
+data/news/
+data/fundamentals/
+data/processed/
+data/external/
+data/sentiment/
+data/cache/
+
+# Build / cache / venv
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+env/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Trained-model artefacts (regenerated on Vertex; not consumed by image)
+models/*.pt
+models/*.pth
+models/*.ckpt
+models/*.pkl
+results/tft_ablations/models/
+results/tft_ablations/logs/
+
+# Lightning training runs
+lightning_logs/
+
+# Local databases / temporary exports
+*.sqlite
+*.db
+*.log
+
+# Claude Code local config (user-only)
+.claude/
+
+# Paper sources unrelated to the in-image runtime
+paper/A faire/
+paper/*.pdf
+
+# Frontend assets unrelated to training
+frontend/
+node_modules/

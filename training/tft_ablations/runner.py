@@ -398,6 +398,12 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--weight-decay", type=float, default=1e-4)
     p.add_argument("--encoder-length", type=int, default=30)
     p.add_argument("--prediction-length", type=int, default=7)
+    p.add_argument("--gcs-output", type=str, default="",
+                   help="Optional GCS prefix (gs://bucket/path) to upload "
+                        "the contents of --out to after training. Used by "
+                        "Vertex AI Custom Jobs since the container is "
+                        "ephemeral. AIP_MODEL_DIR env var is used as a "
+                        "fallback if this flag is empty.")
     return p.parse_args()
 
 
@@ -478,6 +484,32 @@ def main() -> int:
             print(f"  Copied to stable path: {stable_path}")
         except Exception as exc:
             print(f"  Stable copy skipped: {exc}")
+
+    # Vertex AI: upload everything to a GCS path. Either explicit via
+    # --gcs-output, or via the AIP_MODEL_DIR env var (set by Vertex when
+    # baseOutputDirectory is configured). The training container is
+    # ephemeral, so without this step the checkpoints + summary JSON
+    # would be lost when the job finishes. No-op for local runs (both
+    # the flag and the env var unset / empty).
+    aip_dir = (args.gcs_output or os.environ.get("AIP_MODEL_DIR", "")).strip()
+    if aip_dir.startswith("gs://"):
+        try:
+            from google.cloud import storage  # type: ignore
+            rest = aip_dir[5:]
+            bucket_name, _, prefix = rest.partition("/")
+            client = storage.Client()
+            bucket = client.bucket(bucket_name)
+            n_uploaded = 0
+            for f in args.out.rglob("*"):
+                if not f.is_file():
+                    continue
+                rel = f.relative_to(args.out).as_posix()
+                blob_name = f"{prefix.rstrip('/')}/{rel}" if prefix else rel
+                bucket.blob(blob_name).upload_from_filename(str(f))
+                n_uploaded += 1
+            print(f"  Uploaded {n_uploaded} file(s) to {aip_dir}")
+        except Exception as exc:
+            print(f"  GCS upload failed (non-fatal): {exc}")
     return 0
 
 

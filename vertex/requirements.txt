@@ -8,10 +8,15 @@
 
 pytorch-forecasting==1.7.0
 lightning==2.6.1
-pandas>=2.2,<3.1
-numpy>=2.0,<2.5
-scikit-learn>=1.5
-scipy>=1.13
+# numpy < 2 because the base image's pyarrow / pandas / scipy stack was
+# compiled against NumPy 1.x ABI; forcing NumPy 2.x triggers
+# "_ARRAY_API not found" at pandas import time. The local dev box runs
+# NumPy 2.x because torch 2.10 was rebuilt for it, but the Vertex base
+# image is on torch 2.3 / py310 / numpy 1.x.
+numpy<2
+pandas>=2.2,<2.3
+scikit-learn>=1.5,<1.7
+scipy>=1.13,<1.15
 statsmodels>=0.14
-xgboost>=3.0
+xgboost>=2.0,<3.0
 google-cloud-storage>=2.18

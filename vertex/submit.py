@@ -43,6 +43,7 @@ import json
 import shlex
 import subprocess
 import sys
+import tempfile
 import time
 from datetime import datetime
 from pathlib import Path
@@ -64,7 +65,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--machine-type", default="n1-standard-8")
     p.add_argument("--accelerator-type", default="NVIDIA_TESLA_T4",
                    choices=["NVIDIA_TESLA_T4", "NVIDIA_TESLA_V100",
-                            "NVIDIA_TESLA_A100", "NVIDIA_L4"])
+                            "NVIDIA_TESLA_A100", "NVIDIA_L4", "NONE"],
+                   help="Use NONE to run on CPU (slow but no GPU quota needed).")
     p.add_argument("--accelerator-count", type=int, default=1)
     p.add_argument("--service-account", default=None,
                    help="Override service account (defaults to Vertex compute SA).")
@@ -72,6 +74,14 @@ def parse_args() -> argparse.Namespace:
                    help="Print the gcloud command without executing it.")
     p.add_argument("--seed", type=int, default=0,
                    help="BVMT_SEED env var inside the container.")
+    p.add_argument("--smoke", action="store_true",
+                   help="Forward --smoke to the runner. Cheap pre-flight "
+                        "(<1 min wall time once GPU is allocated).")
+    p.add_argument("--preemptible", action="store_true",
+                   help="Use SPOT scheduling. ~70%% cheaper but Vertex can "
+                        "reclaim the VM at any time (24h max lifetime). "
+                        "Required for projects whose on-demand GPU quota "
+                        "is 0 but preemptible quota is non-zero.")
     return p.parse_args()
 
 
@@ -80,45 +90,67 @@ def submit_one(args: argparse.Namespace, variant: str) -> int:
     job_id = f"bvmt-tft-{variant.replace('_', '-')}-{timestamp}"
     output_uri = f"{args.bucket.rstrip('/')}/{variant}/{timestamp}"
 
-    worker_pool_spec = {
-        "machine_spec": {
-            "machine_type": args.machine_type,
-            "accelerator_type": args.accelerator_type,
-            "accelerator_count": args.accelerator_count,
-        },
-        "replica_count": 1,
-        "container_spec": {
-            "image_uri": args.image,
-            "args": [
-                "--variant", variant,
-                "--epochs", str(args.epochs),
-                "--out", "/app/results/tft_ablations",
-            ],
-            "env": [
-                {"name": "BVMT_SEED", "value": str(args.seed)},
-                {"name": "AIP_MODEL_DIR", "value": output_uri},
-            ],
-        },
-    }
-
-    config_path = Path(f"/tmp/bvmt_vertex_{variant}_{timestamp}.json")
-    config_path.write_text(json.dumps([worker_pool_spec], indent=2))
-
-    cmd = [
-        "gcloud", "ai", "custom-jobs", "create",
-        f"--project={args.project}",
-        f"--region={args.region}",
-        f"--display-name={job_id}",
-        f"--worker-pool-spec=machine-type={args.machine_type},"
-        f"replica-count=1,"
-        f"accelerator-type={args.accelerator_type},"
-        f"accelerator-count={args.accelerator_count},"
-        f"container-image-uri={args.image}",
-        # Pass runner args via --args so we don't need a JSON config file.
-        "--args=--variant=" + variant,
-        f"--args=--epochs={args.epochs}",
-        "--args=--out=/app/results/tft_ablations",
+    runner_args = [
+        f"--variant={variant}",
+        f"--epochs={args.epochs}",
+        "--out=/app/results/tft_ablations",
+        f"--gcs-output={output_uri}",
     ]
+    if args.smoke:
+        runner_args.append("--smoke")
+
+    if args.preemptible:
+        # gcloud ai custom-jobs create has no --scheduling-strategy flag, so
+        # we write a YAML config that exposes the full job spec including
+        # scheduling.strategy: SPOT.
+        machine_spec: dict = {"machineType": args.machine_type}
+        if args.accelerator_type != "NONE":
+            machine_spec["acceleratorType"] = args.accelerator_type
+            machine_spec["acceleratorCount"] = args.accelerator_count
+
+        spec = {
+            "workerPoolSpecs": [{
+                "machineSpec": machine_spec,
+                "replicaCount": 1,
+                "containerSpec": {
+                    "imageUri": args.image,
+                    "args": runner_args,
+                    "env": [{"name": "BVMT_SEED", "value": str(args.seed)}],
+                },
+            }],
+            "scheduling": {"strategy": "SPOT"},
+        }
+        config_path = (Path(tempfile.gettempdir())
+                       / f"bvmt_vertex_{variant}_{timestamp}.json")
+        config_path.write_text(json.dumps(spec, indent=2))
+        cmd = [
+            "gcloud", "ai", "custom-jobs", "create",
+            f"--project={args.project}",
+            f"--region={args.region}",
+            f"--display-name={job_id}",
+            f"--config={config_path}",
+        ]
+    else:
+        if args.accelerator_type == "NONE":
+            wps = (f"machine-type={args.machine_type},"
+                   f"replica-count=1,"
+                   f"container-image-uri={args.image}")
+        else:
+            wps = (f"machine-type={args.machine_type},"
+                   f"replica-count=1,"
+                   f"accelerator-type={args.accelerator_type},"
+                   f"accelerator-count={args.accelerator_count},"
+                   f"container-image-uri={args.image}")
+        cmd = [
+            "gcloud", "ai", "custom-jobs", "create",
+            f"--project={args.project}",
+            f"--region={args.region}",
+            f"--display-name={job_id}",
+            f"--worker-pool-spec={wps}",
+        ]
+        for ra in runner_args:
+            cmd.append(f"--args={ra}")
+
     if args.service_account:
         cmd.append(f"--service-account={args.service_account}")
 
@@ -134,8 +166,19 @@ def submit_one(args: argparse.Namespace, variant: str) -> int:
         print("  [DRY RUN — not executed]")
         return 0
 
+    # On Windows, gcloud is a .cmd script that subprocess won't find without
+    # shell=True. We use subprocess.list2cmdline so paths with spaces are
+    # quoted with the Windows-native double-quote convention; using
+    # shlex.quote (POSIX single-quote) would make cmd.exe pass the quotes
+    # through as literals and gcloud would see "--config='C:\...\file.json'".
+    use_shell = sys.platform == "win32"
+    if use_shell:
+        runnable = subprocess.list2cmdline(cmd)
+    else:
+        runnable = cmd
     try:
-        result = subprocess.run(cmd, check=False, capture_output=True, text=True)
+        result = subprocess.run(runnable, shell=use_shell, check=False,
+                                capture_output=True, text=True)
     except FileNotFoundError:
         print("  ERROR: gcloud not found on PATH. Install Google Cloud SDK first.")
         return 2

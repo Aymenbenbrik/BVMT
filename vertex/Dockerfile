@@ -24,6 +24,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY vertex/requirements.txt /app/vertex/requirements.txt
 RUN pip install --no-cache-dir -r /app/vertex/requirements.txt
 
+# The pytorch-gpu Vertex base image ships torch_xla (TPU runtime). Lightning
+# auto-discovers it and tries to initialise PJRT, which segfaults when no
+# PJRT_DEVICE is set. We use CUDA, so the cleanest fix is to remove XLA so
+# the discovery never fires. -y is required because the image runs apt as
+# root (we never sudo) and || true keeps the layer green if torch_xla is
+# already absent in a future base image refresh.
+RUN pip uninstall -y torch_xla pytorch-xla 2>/dev/null || true
+ENV PJRT_DEVICE=CUDA
+
 # Repo (training scripts + data + agents). The dataset
 # data/features/tft_features.csv is checked into the repo and is
 # small enough (~30 MB) to ship inside the container; remove this
