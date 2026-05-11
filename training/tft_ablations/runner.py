@@ -25,10 +25,12 @@ OUTPUTS (per run)
 from __future__ import annotations
 
 import argparse
+import atexit
 import json
 import os
 import random
 import shutil
+import signal
 import sys
 import time
 import warnings
@@ -415,6 +417,23 @@ def main() -> int:
 
     args.out.mkdir(parents=True, exist_ok=True)
 
+    # Wire the emergency-upload safety net BEFORE training starts. On a
+    # preemptible Vertex AI VM, SIGTERM can arrive at any time during
+    # trainer.fit(); without this hook the runner would die mid-fit
+    # without ever reaching the post-training GCS upload, leaving
+    # results/tft_ablations on the dead container with nothing flushed.
+    aip_dir_for_emergency = (
+        args.gcs_output or os.environ.get("AIP_MODEL_DIR", "")
+    ).strip()
+    global _TERM_OUT_DIR, _TERM_AIP_DIR
+    _TERM_OUT_DIR = args.out
+    _TERM_AIP_DIR = aip_dir_for_emergency
+    if aip_dir_for_emergency.startswith("gs://"):
+        signal.signal(signal.SIGTERM, _sigterm_handler)
+        atexit.register(_emergency_upload)
+        print(f"  [safety] SIGTERM handler armed; emergency target = {aip_dir_for_emergency}",
+              flush=True)
+
     if args.smoke:
         smoke_stocks = 3
         max_epochs = min(args.epochs, 5)
@@ -485,32 +504,72 @@ def main() -> int:
         except Exception as exc:
             print(f"  Stable copy skipped: {exc}")
 
-    # Vertex AI: upload everything to a GCS path. Either explicit via
-    # --gcs-output, or via the AIP_MODEL_DIR env var (set by Vertex when
-    # baseOutputDirectory is configured). The training container is
-    # ephemeral, so without this step the checkpoints + summary JSON
-    # would be lost when the job finishes. No-op for local runs (both
-    # the flag and the env var unset / empty).
-    aip_dir = (args.gcs_output or os.environ.get("AIP_MODEL_DIR", "")).strip()
-    if aip_dir.startswith("gs://"):
-        try:
-            from google.cloud import storage  # type: ignore
-            rest = aip_dir[5:]
-            bucket_name, _, prefix = rest.partition("/")
-            client = storage.Client()
-            bucket = client.bucket(bucket_name)
-            n_uploaded = 0
-            for f in args.out.rglob("*"):
-                if not f.is_file():
-                    continue
-                rel = f.relative_to(args.out).as_posix()
-                blob_name = f"{prefix.rstrip('/')}/{rel}" if prefix else rel
-                bucket.blob(blob_name).upload_from_filename(str(f))
-                n_uploaded += 1
-            print(f"  Uploaded {n_uploaded} file(s) to {aip_dir}")
-        except Exception as exc:
-            print(f"  GCS upload failed (non-fatal): {exc}")
     return 0
+
+
+def _gcs_upload(local_dir: Path, aip_dir: str) -> int:
+    """Upload everything under local_dir to aip_dir (a gs:// URI).
+
+    Idempotent: re-uploads any file that exists locally. Returns the
+    number of files actually uploaded; 0 if aip_dir is empty/non-gs:// or
+    the upload failed (in which case the exception is logged but not
+    raised, so the calling exit path still completes).
+    """
+    if not aip_dir or not aip_dir.startswith("gs://"):
+        return 0
+    try:
+        from google.cloud import storage  # type: ignore
+        rest = aip_dir[5:]
+        bucket_name, _, prefix = rest.partition("/")
+        client = storage.Client()
+        bucket = client.bucket(bucket_name)
+        n_uploaded = 0
+        if not local_dir.exists():
+            print(f"  [gcs-upload] local dir {local_dir} missing, nothing to copy")
+            return 0
+        for f in local_dir.rglob("*"):
+            if not f.is_file():
+                continue
+            rel = f.relative_to(local_dir).as_posix()
+            blob_name = f"{prefix.rstrip('/')}/{rel}" if prefix else rel
+            bucket.blob(blob_name).upload_from_filename(str(f))
+            n_uploaded += 1
+        sys.stdout.flush()
+        print(f"  [gcs-upload] {n_uploaded} file(s) -> {aip_dir}", flush=True)
+        return n_uploaded
+    except Exception as exc:
+        print(f"  [gcs-upload] FAILED (non-fatal): {exc}", flush=True)
+        return 0
+
+
+# Module-level state used by the SIGTERM handler so the upload still
+# fires when the worker is preempted. Vertex AI sends SIGTERM and gives
+# the container ~30 s before SIGKILL, which is enough for an O(MB) GCS
+# upload of the latest checkpoint plus the summary JSON.
+_TERM_OUT_DIR: Path | None = None
+_TERM_AIP_DIR: str = ""
+_TERM_FIRED: bool = False
+
+
+def _emergency_upload():
+    """Upload whatever is on disk now. Called from SIGTERM and atexit."""
+    global _TERM_FIRED
+    if _TERM_FIRED:
+        return
+    _TERM_FIRED = True
+    if _TERM_OUT_DIR is None:
+        return
+    print(f"\n[emergency-upload] dumping {_TERM_OUT_DIR} -> {_TERM_AIP_DIR}",
+          flush=True)
+    _gcs_upload(_TERM_OUT_DIR, _TERM_AIP_DIR)
+
+
+def _sigterm_handler(signum, frame):  # noqa: ARG001
+    print(f"\n[sigterm] received signal {signum}; flushing partial state",
+          flush=True)
+    _emergency_upload()
+    # Re-raise the default behaviour so Vertex marks the job correctly.
+    sys.exit(1)
 
 
 if __name__ == "__main__":

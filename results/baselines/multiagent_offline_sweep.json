@@ -1,0 +1,115 @@
+{
+  "n": 5582,
+  "up_ratio": 0.4983876746685776,
+  "graph_proxy": {
+    "window_days": 60,
+    "top_k": 10,
+    "min_corr": 0.3
+  },
+  "graph_coverage": {
+    "rows_with_neighbors": 3851,
+    "pct": 68.98960945897528,
+    "rows_passing_orchestrator_gate": 3435
+  },
+  "configs": [
+    {
+      "config": "A1 TFT only",
+      "acc": 51.79147259046937,
+      "ci_lo": 50.483697599426726,
+      "ci_hi": 53.11761017556431,
+      "macro_f1": 0.5160228351244741,
+      "mcnemar_vs_A1_chi2": 0.0,
+      "mcnemar_vs_A1_p": 1.0,
+      "flips_vs_A1": 0
+    },
+    {
+      "config": "A4 TFT+Graph (gated)",
+      "acc": 51.79147259046937,
+      "ci_lo": 50.483697599426726,
+      "ci_hi": 53.11761017556431,
+      "macro_f1": 0.5160228351244741,
+      "mcnemar_vs_A1_chi2": 0.0,
+      "mcnemar_vs_A1_p": 1.0,
+      "flips_vs_A1": 0
+    },
+    {
+      "config": "A8 TFT+Graph (no gate)",
+      "acc": 51.79147259046937,
+      "ci_lo": 50.483697599426726,
+      "ci_hi": 53.11761017556431,
+      "macro_f1": 0.5160228351244741,
+      "mcnemar_vs_A1_chi2": 0.0,
+      "mcnemar_vs_A1_p": 1.0,
+      "flips_vs_A1": 0
+    },
+    {
+      "config": "Graph-only",
+      "acc": 50.75241848799713,
+      "ci_lo": 49.46211035471157,
+      "ci_hi": 52.09602293084916,
+      "macro_f1": 0.5002598695132303,
+      "mcnemar_vs_A1_chi2": 1.2105067064083457,
+      "mcnemar_vs_A1_p": 0.27123179320214397,
+      "flips_vs_A1": 2684
+    }
+  ],
+  "weight_sensitivity": [
+    {
+      "w_graph": 0.0,
+      "acc": 51.79147259046937,
+      "ci_lo": 50.483697599426726,
+      "ci_hi": 53.11761017556431,
+      "mcnemar_vs_A1_p": 1.0,
+      "flips_vs_A1": 0
+    },
+    {
+      "w_graph": 0.2,
+      "acc": 51.79147259046937,
+      "ci_lo": 50.483697599426726,
+      "ci_hi": 53.11761017556431,
+      "mcnemar_vs_A1_p": 1.0,
+      "flips_vs_A1": 0
+    },
+    {
+      "w_graph": 0.37,
+      "acc": 51.79147259046937,
+      "ci_lo": 50.483697599426726,
+      "ci_hi": 53.11761017556431,
+      "mcnemar_vs_A1_p": 1.0,
+      "flips_vs_A1": 0
+    },
+    {
+      "w_graph": 0.5,
+      "acc": 51.397348620566106,
+      "ci_lo": 50.089125761375854,
+      "ci_hi": 52.740953063418125,
+      "mcnemar_vs_A1_p": 0.4754689602659453,
+      "flips_vs_A1": 866
+    },
+    {
+      "w_graph": 0.65,
+      "acc": 50.85990684342529,
+      "ci_lo": 49.587513436044425,
+      "ci_hi": 52.16768183446793,
+      "mcnemar_vs_A1_p": 0.17623224021150952,
+      "flips_vs_A1": 1422
+    }
+  ],
+  "data_dependency": {
+    "offline_realizable": [
+      "A1",
+      "A4_gated",
+      "A4_nogate_A8",
+      "graph_only"
+    ],
+    "requires_postgres": [
+      "A2 (fundamental)",
+      "A3 (sentiment)",
+      "A5 (fund+sent)",
+      "A6 (seven-agent)",
+      "A7 (no DQ rules)",
+      "A9 (no weight redist)"
+    ],
+    "reason": "FundamentalAgent depends on financial_ratios table + trained XGBoost checkpoint; SentimentAgent depends on news_articles pre-scored table. Neither is shipped offline."
+  }
+}

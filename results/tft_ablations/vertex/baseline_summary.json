@@ -1,0 +1,49 @@
+{
+  "variant": "baseline",
+  "run_name": "tft_baseline_full_20260510_104833",
+  "best_val_loss": 0.015881700441241264,
+  "best_ckpt": "/app/results/tft_ablations/models/tft_baseline_full_20260510_104833_epoch=04_val_loss=0.0159.ckpt",
+  "epochs_trained": 20,
+  "params": 368479,
+  "vsn_patched": 0,
+  "vsn_patched_names": [],
+  "target_normalizer": "GroupNormalizer",
+  "dir_acc_history": [
+    {
+      "epoch": 0,
+      "dir_acc": 42.11
+    },
+    {
+      "epoch": 0,
+      "dir_acc": 52.63
+    },
+    {
+      "epoch": 3,
+      "dir_acc": 54.39
+    },
+    {
+      "epoch": 6,
+      "dir_acc": 52.63
+    },
+    {
+      "epoch": 9,
+      "dir_acc": 52.63
+    },
+    {
+      "epoch": 12,
+      "dir_acc": 52.63
+    },
+    {
+      "epoch": 15,
+      "dir_acc": 52.63
+    },
+    {
+      "epoch": 18,
+      "dir_acc": 50.88
+    }
+  ],
+  "best_q50_dir_acc": 54.39,
+  "elapsed_seconds": 4281.0,
+  "seed": 0,
+  "smoke": false
+}

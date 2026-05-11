@@ -1,0 +1,61 @@
+{
+  "variant": "no_vsn",
+  "run_name": "tft_no_vsn_full_20260510_104828",
+  "best_val_loss": 0.015857281163334846,
+  "best_ckpt": "/app/results/tft_ablations/models/tft_no_vsn_full_20260510_104828_epoch=11_val_loss=0.0159.ckpt",
+  "epochs_trained": 27,
+  "params": 368479,
+  "vsn_patched": 3,
+  "vsn_patched_names": [
+    "static_variable_selection",
+    "encoder_variable_selection",
+    "decoder_variable_selection"
+  ],
+  "target_normalizer": "GroupNormalizer",
+  "dir_acc_history": [
+    {
+      "epoch": 0,
+      "dir_acc": 50.88
+    },
+    {
+      "epoch": 0,
+      "dir_acc": 57.89
+    },
+    {
+      "epoch": 3,
+      "dir_acc": 52.63
+    },
+    {
+      "epoch": 6,
+      "dir_acc": 54.39
+    },
+    {
+      "epoch": 9,
+      "dir_acc": 54.39
+    },
+    {
+      "epoch": 12,
+      "dir_acc": 54.39
+    },
+    {
+      "epoch": 15,
+      "dir_acc": 54.39
+    },
+    {
+      "epoch": 18,
+      "dir_acc": 50.88
+    },
+    {
+      "epoch": 21,
+      "dir_acc": 52.63
+    },
+    {
+      "epoch": 24,
+      "dir_acc": 52.63
+    }
+  ],
+  "best_q50_dir_acc": 57.89,
+  "elapsed_seconds": 5468.4,
+  "seed": 0,
+  "smoke": false
+}

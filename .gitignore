@@ -45,3 +45,19 @@ lightning_logs/
 # Local databases / temporary exports
 *.sqlite
 *.db
+
+# Vertex AI checkpoints under results/ (regenerable from training/tft_ablations/runner.py)
+results/tft_ablations/vertex/*.ckpt
+
+# LaTeX build intermediates (PDFs are committed)
+paper/*.aux
+paper/*.log
+paper/*.out
+paper/*.toc
+paper/*.synctex.gz
+paper/*.fls
+paper/*.fdb_latexmk
+
+# Claude Code local state
+.claude/settings.local.json
+.claude/scheduled_tasks.lock

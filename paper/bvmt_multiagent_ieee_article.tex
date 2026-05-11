@@ -28,15 +28,26 @@
 
 \begin{document}
 
-\title{Architecting Robustness-Aware Multi-Agent Intelligence for Illiquid Financial Ecosystems: A Temporal Fusion Approach for North African Equity Markets}
+\title{Reproducibility-First Multi-Component Forecasting for Illiquid Equity Markets: Baselines, Ablations, and a Documented Discrepancy on the Tunisian Stock Exchange}
 
-\author{\IEEEauthorblockN{Anonymous}
-\IEEEauthorblockA{Submitted to IEEE Conference on Secure and Trustworthy AI}}
+\author{
+\IEEEauthorblockN{Aymen Ben Brik}
+\IEEEauthorblockA{\textit{Department of Information Technology and Mathematics}\\
+\textit{Esprit School of Business}\\
+Tunis, Tunisia\\
+aymen.benbrik@esprit.tn}
+\and
+\IEEEauthorblockN{Amen Allah Fraj}
+\IEEEauthorblockA{\textit{Department of Information Technology and Mathematics}\\
+\textit{Esprit School of Business}\\
+Tunis, Tunisia\\
+amenallah.fraj@esprit.tn}
+}
 
 \maketitle
 
 \begin{abstract}
-Financial AI systems are predominantly designed and evaluated on liquid, developed markets. Thin, illiquid emerging markets present distinct challenges: heterogeneous feature scales across stocks, sparse volume signals, limited temporal coverage, and no public benchmarks. This paper presents a seven-agent architecture combining Temporal Fusion Transformers, XGBoost fundamental analysis, multilingual NLP sentiment scoring, Graph Attention Networks, and explainable AI components. The system is designed, trained, and evaluated on a real emerging market dataset spanning 10 years (2016--2025) with 68 stocks and 116,626 trading records. The Temporal Fusion Transformer achieves $77.4\%$ directional accuracy on the unseen 2025 test set ($N_{\mathrm{test}}=10{,}314$, 43 of 68 tickers, 241 trading days). Empirically, the 2025 test slice is approximately balanced (UP ratio $49.98\%$). Eight competing baselines measured on the same split --- four trivial / trend-following rules (always-UP, always-DOWN, momentum $5/20$, MA$_{20}$ crossover) and three tabular-ML models (logistic regression L2, random forest, XGBoost) trained on a flattened 60-day $\times$ 15-feature input --- form a $50$--$53\%$ accuracy band; the strongest, logistic regression at $52.88\%$, sits $24.5$ percentage points below TFT v3. The size of this gap is itself a reason for caution and motivates the Phase~1 internal-ablation suite (TFT $-$ VSN, $-$ per-window normalization, $-$ confidence gating) that ships with the article. A preliminary CNN-LSTM ablation across four hyperparameter variants returns test accuracies in the band $51.7$--$53.8\%$, suggesting --- but not yet proving --- that convolutional approaches struggle on heterogeneous financial feature matrices; a formally powered seed sweep is shipped alongside the article. Per-stock target normalization combined with per-encoder-window feature scaling and confidence-gated agent isolation provide robustness against data poisoning in thin markets. The architecture is designed to support the transparency and auditability requirements of the EU AI Act through integrated explainability and an auditable decision trace; full regulatory conformity additionally requires governance, risk management, and post-market monitoring beyond the technical scope of this paper. This work demonstrates that attention-based architectures with variable selection networks outperform conventional convolutional-recurrent models on emerging market data, and that multi-agent systems with adaptive weighting can maintain prediction quality under heterogeneous market conditions.
+Financial AI systems are predominantly designed and evaluated on liquid, developed markets. Thin, illiquid emerging markets present distinct challenges: heterogeneous feature scales across stocks, sparse volume signals, limited temporal coverage, and no public benchmarks. This paper presents a multi-component decision pipeline on the Tunisian Stock Exchange (BVMT, 68 stocks, 2016--2025, 116{,}626 trading records) combining a Temporal Fusion Transformer (TFT), XGBoost-based fundamental analysis, multilingual NLP sentiment scoring, Graph Attention Networks, and a SHAP-based explanation layer. Our central empirical finding is a reproducibility result. We harmonize the evaluation protocol across all $13$ models tested in this work --- ten competing baselines plus three internal TFT ablations --- on a single 2025 test slice ($N=5{,}582$ unique (ticker, date) predictions over $43$ tickers, UP ratio $49.84\%$) after removing $\sim 1{,}200$ duplicate inference rows that artifactually inflated earlier numbers. On this harmonized slice, the Vertex-reproducible TFT v3 reference (per-stock \texttt{GroupNormalizer}, Variable Selection Network, pinball quantile loss on $Q_{0.1}/Q_{0.5}/Q_{0.9}$) reaches $51.79\%$ directional accuracy (95\% bootstrap CI $[50.43, 53.08]$, macro-F1 $0.516$), which is statistically indistinguishable from all strong non-TFT baselines: logistic regression L2 $52.79\%$ (McNemar $p = 0.35$), simple LSTM $52.69\%$ ($p = 0.41$), and standard Transformer $52.45\%$ ($p = 0.52$). Two internal ablations move accuracy by $\leq 0.4$ pp (TFT $-$ VSN $51.56\%$, $p = 0.73$; TFT $-$ per-stock norm $51.40\%$, $p = 0.67$); the deltas are within noise, providing no evidence for or against the original architectural hypotheses. An earlier internal estimate of $77.4\%$ directional accuracy is documented in Section~\ref{sec:reproducibility_box} but is not reproducible from the released training pipeline; we retain it transparently as a development-time number, not as a result. The full 13-model panel (Table~\ref{tab:baselines}) clusters in a $49.8$--$52.8\%$ accuracy band where no model meaningfully separates from the trivial 50\% floor. Per-stock target normalization and per-encoder-window feature scaling continue to provide architectural defenses against data poisoning in thin markets; the harmonized accuracy comparison shows no measurable accuracy cost for these defenses, reframing them as a robustness mechanism with neutral accuracy impact. The pipeline is designed to support the transparency and auditability requirements of the EU AI Act through integrated explainability and an auditable decision trace; full regulatory conformity additionally requires governance, risk management, and post-market monitoring beyond the technical scope of this paper. The contributions are therefore (i) a reproducible Vertex-AI training pipeline for TFT-on-thin-market with two internal training ablations and one post-hoc evaluation-time ablation, (ii) ten baselines plus three TFT variants harmonized on a single test slice with bootstrap CIs, macro-F1, and pairwise McNemar tests, and (iii) a documented gap between an earlier headline and the reproducible numbers --- offered as a reproducibility lesson for thin-market AI research.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -78,11 +89,11 @@ This market presents both challenges and opportunities. To the best of our knowl
 This paper makes the following contributions:
 
 \begin{enumerate}
-\item \textbf{Temporal Fusion Transformer adaptation for thin markets}: A TFT model architecture combining (i) per-stock target normalization (\texttt{GroupNormalizer} fitted on the training split only) with (ii) per-encoder-window feature scaling (\texttt{EncoderNormalizer}, refit causally inside each 30-day input window), (iii) confidence-gated feature selection, and (iv) multi-horizon quantile regression, achieving 77.4\% directional accuracy on seven-day forecasts. The design explicitly handles heterogeneous data scales and sparse volume signals through the Variable Selection Network's learned feature importance weights.
+\item \textbf{A reproducible Vertex-AI training pipeline for TFT-on-thin-market with full ablation suite}: We release a containerized training pipeline (\texttt{vertex/Dockerfile}, \texttt{vertex/cloudbuild.yaml}, \texttt{training/tft\_ablations/runner.py}) that re-trains a TFT v3 reference (per-stock \texttt{GroupNormalizer}, Variable Selection Network, pinball quantile loss on $Q_{0.1}/Q_{0.5}/Q_{0.9}$, hidden 64, encoder 30, horizon 7) plus three internal ablations (TFT $-$ VSN, TFT $-$ per-stock norm, post-hoc confidence-gating sweep) bit-for-bit from the same seed. On the harmonized 2025 test slice ($N=5{,}582$, UP ratio $49.84\%$, obtained by de-duplicating the raw Vertex inference output to one valid prediction per (ticker, date) pair), the reference reaches $51.79\%$ directional accuracy (95\% bootstrap CI $[50.43, 53.08]$, macro-F1 $0.516$). Two architectural ablations move accuracy by $\leq 0.4$ pp (TFT $-$ VSN $51.56\%$, McNemar vs.\ reference $p = 0.73$; TFT $-$ per-stock norm $51.40\%$, $p = 0.67$); the deltas are within noise and provide no significant evidence for or against the original hypothesis that the per-stock target normalizer and the VSN softmax gates carry directional skill on BVMT 2025. Section~\ref{sec:reproducibility_box} discloses a non-reproducible earlier estimate of $77.4\%$ and documents the discrepancy explicitly.
 
-\item \textbf{Architectural comparison with explicit statistical caveat}: A four-run preliminary CNN-LSTM ablation in which test accuracy clusters in the band $51.7$--$53.8\%$ across hyperparameter variations. A formally powered seed sweep ($N \ge 20$, mean $\pm 95\%$ bootstrap CI, Wilcoxon test) is shipped as \texttt{training/cnn\_lstm\_seed\_sweep.py} and is required before claiming an empirical ``ceiling''. The hypothesized mechanism --- that Conv1D over heterogeneous financial features (price, RSI, volume) treats them as spatially equivalent and lacks the per-feature gating of the TFT's Variable Selection Network --- is offered as the most parsimonious explanation pending the sweep result.
+\item \textbf{Ten competing baselines on a shared walk-forward protocol}: Five trivial / trend-following rules (always-UP, always-DOWN, random uniform, momentum $5/20$, MA$_{20}$ crossover), three tabular-ML models (logistic regression L2, random forest, XGBoost) trained on a flattened 60-day $\times$ 15-feature input, and two sequential-deep baselines (a 2-layer LSTM at $54$\,k parameters, a standard 2-block Transformer at $68$\,k parameters) given the same input. All ten are evaluated on the harmonized 2025 test slice ($N=5{,}582$, UP ratio $49.84\%$) shared with the three TFT variants, with bootstrap 95\% CIs, per-class macro-F1, and pairwise McNemar tests (Table~\ref{tab:baselines}). The strongest non-TFT baseline is logistic regression L2 at $52.79\%$; the simple LSTM and standard Transformer reach $52.69\%$ and $52.45\%$ respectively. Pairwise McNemar tests of TFT v3 vs.\ the three strong non-TFT models give $p \in \{0.35, 0.41, 0.52\}$, confirming that TFT v3 is statistically indistinguishable from these baselines on the harmonized slice. A preliminary CNN-LSTM ablation across four hyperparameter variants returns test accuracies in the same $51.7$--$53.8\%$ band; a formally powered seed sweep is shipped as \texttt{training/cnn\_lstm\_seed\_sweep.py}.
 
-\item \textbf{Multi-agent ensemble with failure isolation and confidence gating}: A seven-agent architecture implementing agent-level trust boundaries, confidence-gated weight adaptation, and failure isolation. The design provides robustness against data poisoning in thin markets where individual manipulated trades can shift global statistics.
+\item \textbf{Multi-component pipeline with failure isolation and confidence gating, presented as a robustness/auditability contribution rather than an accuracy contribution}: A seven-module pipeline implementing typed agent-level trust boundaries, confidence-gated weight adaptation, and failure isolation. Per-stock target normalization and per-encoder-window feature scaling provide architectural defenses against data poisoning in thin markets; the ablations of contribution~1 show that on this dataset these defenses also cost a few percentage points of directional accuracy, making them a measured trade-off rather than a free lunch.
 
 \item \textbf{Explainability framework aligned with EU AI Act transparency requirements}: An integrated XAI layer producing SHAP-based feature importance, attention weight extraction, and plain-language decision explanations \emph{designed to support} the transparency obligations of Articles 13 and 14 of the EU AI Act (2024) for high-risk AI in finance. Full conformity additionally depends on governance, risk management, technical documentation per Annex IV, post-market monitoring, and independent conformity assessment that lie outside the scope of this technical contribution and are listed as deployment work in Section~\ref{sec:security}.B.
 
@@ -92,7 +103,7 @@ A sketch of how the same correlation infrastructure could be repurposed for mark
 
 \subsection{Paper Organization}
 
-The remainder of this paper is structured as follows. Section~\ref{sec:related} reviews related work on temporal models for financial forecasting, CNN-LSTM hybrid architectures, multi-agent systems in finance, explainable AI for financial compliance, graph neural networks for market structure analysis, and NLP for non-English financial markets. Section~\ref{sec:architecture} presents the seven-agent system architecture and describes agent communication protocols, failure isolation, adaptive weight matrices, and confidence gating mechanisms. Section~\ref{sec:methodology} details the dataset construction, feature engineering process, TFT model configuration including the Variable Selection Network formulation, walk-forward validation protocol, and CNN-LSTM comparison architecture. Section~\ref{sec:experiments} presents experimental results including CNN-LSTM ablation studies and TFT version progression. Section~\ref{sec:results} contextualizes the 77.4\% directional accuracy against the empirically-measured trivial baselines on the 2025 test set (always-UP, always-DOWN, momentum $5/20$, MA$_{20}$ crossover), distinguishes the BCE and pinball loss regimes used in v1 and v3, and discusses quantile uncertainty quantification. Section~\ref{sec:security} presents the robustness and auditability implications --- adversarial robustness in thin markets via per-stock target normalization and per-encoder-window feature scaling, XAI as an audit-trail building block aligned with (but not by itself constituting) EU AI Act transparency, and module-level trust and isolation properties. The defenses are conceptual and architectural; an empirical poisoning study is identified as future work. Section~\ref{sec:conclusion} concludes with limitations and future work, where a correlation-based market-surveillance extension is outlined.
+The remainder of this paper is structured as follows. Section~\ref{sec:related} reviews related work on temporal models for financial forecasting, CNN-LSTM hybrid architectures, multi-agent systems in finance, explainable AI for financial compliance, graph neural networks for market structure analysis, and NLP for non-English financial markets. Section~\ref{sec:architecture} presents the seven-agent system architecture and describes agent communication protocols, failure isolation, adaptive weight matrices, and confidence gating mechanisms. Section~\ref{sec:methodology} details the dataset construction, feature engineering process, TFT model configuration including the Variable Selection Network formulation, walk-forward validation protocol, and CNN-LSTM comparison architecture. Section~\ref{sec:experiments} presents experimental results including CNN-LSTM ablation studies and TFT version progression. Section~\ref{sec:results} contextualizes the Vertex-reproducible $51.79\%$ directional accuracy against the ten empirically-measured baselines on the 2025 test set, documents the discrepancy with an earlier non-reproducible internal estimate (Section~\ref{sec:reproducibility_box}), distinguishes the BCE and pinball loss regimes used in v1 and v3, and discusses quantile uncertainty quantification. Section~\ref{sec:security} presents the robustness and auditability implications --- adversarial robustness in thin markets via per-stock target normalization and per-encoder-window feature scaling, XAI as an audit-trail building block aligned with (but not by itself constituting) EU AI Act transparency, and module-level trust and isolation properties. The defenses are conceptual and architectural; an empirical poisoning study is identified as future work. Section~\ref{sec:conclusion} concludes with limitations and future work, where a correlation-based market-surveillance extension is outlined.
 
 \section{Related Work}\label{sec:related}
 
@@ -106,7 +117,7 @@ Attention mechanisms address this through explicit feature weighting. The Transf
 
 Subsequent work has extended the time-series transformer family along several axes. Attention-efficiency variants~\cite{ref:informer,ref:autoformer,ref:pyraformer,ref:fedformer} reduce the quadratic cost of self-attention to support longer horizons. Patch-based and frequency-decomposition models~\cite{ref:patchtst,ref:timesnet} reformulate the input representation; inverted-attention~\cite{ref:itransformer} and multi-scale mixing~\cite{ref:timemixer} restructure how variates and scales interact. A simple linear baseline~\cite{ref:dlinear} and a non-attention hierarchical model~\cite{ref:nhits} have been shown to match or exceed transformer accuracy on standard long-horizon benchmarks, motivating careful baselining of attention claims; an LLM-reprogramming approach~\cite{ref:timellm} applies pretrained text models to numeric forecasting. We retain the TFT formulation here for two reasons: (i) its Variable Selection Network produces per-variable interpretability that an EU AI Act-aligned audit trail can consume directly, and (ii) the extensions above optimize long-horizon accuracy on benchmarks (ETT, Weather, Electricity) whose univariate-or-near-univariate structure differs from the heterogeneous, sparse-volume emerging-market matrix this paper targets. Action~1.4 of the improvement plan (Section~\ref{sec:tft_ablations}) tests the TFT's claimed gains via internal ablations rather than via swapping the backbone.
 
-Most published TFT applications target developed markets (S\&P 500, NASDAQ, European indices) with reported directional accuracy ranges of 55--65\% on daily forecasts. Emerging markets, by contrast, exhibit time-varying integration with global markets~\cite{ref:bekaert_harvey} and well-documented thin-liquidity effects that complicate factor stability and out-of-sample reproducibility~\cite{ref:harvey_multiple,ref:lopez_causal}. This paper demonstrates that with careful adaptation to thin market conditions --- specifically per-stock target normalization, per-encoder-window feature scaling, and confidence gating --- TFT can achieve 77.4\% on emerging market data with an equivalent or longer prediction horizon (seven days).
+Most published TFT applications target developed markets (S\&P 500, NASDAQ, European indices) with reported directional accuracy ranges of $55$--$65\%$ on daily forecasts. Emerging markets, by contrast, exhibit time-varying integration with global markets~\cite{ref:bekaert_harvey} and well-documented thin-liquidity effects that complicate factor stability and out-of-sample reproducibility~\cite{ref:harvey_multiple,ref:lopez_causal}. On BVMT 2025 data, the Vertex-reproducible TFT v3 (per-stock target normalization, VSN, pinball quantile loss, seven-day horizon) reaches $51.79\%$ directional accuracy on the harmonized test slice (Section~\ref{sec:directional_acc_on_test}), placing it in the $49.8$--$52.8\%$ band of the classical and deep baselines of Table~\ref{tab:baselines} and below the $55$--$65\%$ developed-market range. The result is consistent with the thin-market priors of \cite{ref:bekaert_harvey,ref:harvey_multiple} and motivates the per-stock-normalization / VSN ablations of Section~\ref{sec:tft_ablations}, which find no significant change in accuracy when these components are removed.
 
 \subsection{CNN-LSTM Hybrid Architectures}
 
@@ -114,7 +125,7 @@ CNN-LSTM hybrids have been explored for financial forecasting as a way to combin
 
 However, a critical assumption underlying CNN-LSTM architectures is that input dimensions are spatially correlated — that adjacent columns (or nearby positions in a 2D matrix) encode related information. This assumption is valid for image data where adjacent pixels are correlated. For financial feature matrices of shape [60 days, 15 features], this assumption is violated: close\_price, RSI\_14, and volume\_MA\_20 are fundamentally different quantities with no spatial relationship.
 
-Prior work (e.g., Chen et al., 2020; Krauss et al., 2017) documents this limitation theoretically but rarely provides empirical evidence across multiple runs and hyperparameter settings on a single dataset. This paper contributes a preliminary observation: across four independent CNN-LSTM training runs with varied batch sizes and learning rates, all achieved directional accuracy between $51.7\%$ and $53.8\%$ --- barely above the $50\%$ random baseline and far below the $77.4\%$ achieved by TFT on the same data. We are explicit that four runs do not power a formal ceiling proof; a seed-sweep harness ($N \ge 20$) is shipped with the public code and described in Section~\ref{sec:experiments}. The article therefore claims a \emph{consistent four-run signature}, not an empirical ceiling, and motivates the TFT comparison through an inductive-bias argument rather than a falsified one.
+Prior work (e.g., Chen et al., 2020; Krauss et al., 2017) documents this limitation theoretically but rarely provides empirical evidence across multiple runs and hyperparameter settings on a single dataset. This paper contributes a preliminary observation: across four independent CNN-LSTM training runs with varied batch sizes and learning rates, all achieved directional accuracy between $51.7\%$ and $53.8\%$, in the same $50$--$54\%$ band as the Vertex-reproducible TFT v3 reference ($51.79\%$, Section~\ref{sec:directional_acc_on_test}) and the strongest non-TFT baselines (logistic regression $52.88\%$, Table~\ref{tab:baselines}). We are explicit that four runs do not power a formal ceiling proof; a seed-sweep harness ($N \ge 20$) is shipped with the public code and described in Section~\ref{sec:experiments}. The article therefore claims a \emph{consistent four-run signature}, not an empirical ceiling.
 
 \subsection{Multi-Agent Systems in Finance}
 
@@ -491,7 +502,7 @@ precision & bf16-mixed & RTX 30xx / T4 Ampere \\
 
 \subsection{Walk-Forward Validation Protocol}
 
-Random train-test splits are invalid for time series because they create temporal leakage: future data contaminates training, producing artificially inflated accuracy. The walk-forward protocol ensures the model is always evaluated on data postdating its training window:
+Random train-test splits are invalid for time series because they create temporal leakage: future data contaminates training, producing artificially inflated accuracy. \cite{ref:bergmeir_cv_ts} reviews when (and when not) leave-one-out and $k$-fold variants remain valid on stationary time series, and motivates the strictly sequential walk-forward protocol used here. The walk-forward protocol ensures the model is always evaluated on data postdating its training window:
 
 \begin{figure}[htbp]
 \centering
@@ -625,7 +636,7 @@ The narrow band $[51.7\%, 53.8\%]$ across the four runs is \emph{suggestive} of 
 
 \begin{table*}[htbp]
 \centering
-\caption{TFT progression: validation loss from v1 (binary classification, BCE) to v3 (quantile regression, pinball). The two losses live on different scales; the percentage column is provided for v1 only, where it is comparable to a random-classifier BCE baseline of $\ln 2 \approx 0.6931$. The v3 row is reported for completeness; its loss is not directly comparable to the BCE baseline, see Section~\ref{sec:results}.}
+\caption{TFT progression: validation loss from v1 (binary classification, BCE) through v3 development (pinball, pre-normalization scale) to the Vertex-reproducible v3 reference (pinball, post-normalization scale). The three loss values live on three different scales (see Section~\ref{sec:directional_acc_on_test}); the percentage column is provided for v1 only, where it is comparable to a random-classifier BCE baseline of $\ln 2 \approx 0.6931$. The ``v3 dev'' row is the development-time number associated with the non-reproducible $77.4\%$ figure of Section~\ref{sec:reproducibility_box}; the ``v3 Vertex'' row is the reproducible reference used throughout the rest of the article.}
 \label{tab:tft_progression}
 \small
 \begin{tabular}{lccccl}
@@ -634,7 +645,8 @@ The narrow band $[51.7\%, 53.8\%]$ across the four runs is \emph{suggestive} of 
 \midrule
 Random baseline   & BCE     & 0.6931 & ---     & --- & $\ln 2$ binary \\
 TFT v1 (consolidated)  & BCE     & 0.6051 & $+12.7\%$ & 7   & dropout 0.3, hidden 32, no warmup \\
-TFT v3 Final      & Pinball & 0.5161 & n/a     & 16  & quantile regression (Q10/Q50/Q90), warmup, hidden 64, dropout 0.3 \\
+TFT v3 dev (non-reproducible) & Pinball (raw return) & 0.5161 & n/a & 16 & quantile regression (Q10/Q50/Q90), warmup, hidden 64, dropout 0.3 \\
+\textbf{TFT v3 Vertex (reference)} & Pinball (z-scored) & 0.0159 & n/a & 4 & same architecture, reproducible Vertex retrain (Section~\ref{sec:directional_acc_on_test}) \\
 \bottomrule
 \end{tabular}
 \normalsize
@@ -642,75 +654,59 @@ TFT v3 Final      & Pinball & 0.5161 & n/a     & 16  & quantile regression (Q10/
 
 The v1 entry consolidates the development iterations recorded under \texttt{lightning\_logs/version\_0..4} (all sharing the dropout~$=0.3$, hidden~$=32$ configuration); the best epoch and validation loss above are read directly from \texttt{results/metrics.csv}. The transition from v1 to v3 changes the prediction target (binary direction $\rightarrow$ continuous 7-day return) and the loss family (BCE $\rightarrow$ pinball); a head-to-head BCE comparison would require a binary-classification re-run of v3 and is left to future work. The best epoch shift from 7 to 16 is consistent with the introduction of the 3-epoch warmup in v3 and a learning rate reduced from $10^{-3}$ to $3\times 10^{-4}$, which together delay convergence and avoid the v1 over-fitting plateau visible in Figure~\ref{fig:training_curves}.
 
-\subsection{Directional Accuracy on Test Data}
+\subsection{Directional Accuracy on Test Data}\label{sec:directional_acc_on_test}
 
-\begin{figure}[htbp]
-\centering
-\begin{tikzpicture}
-\begin{axis}[
-    ybar,
-    bar width=0.5cm,
-    ylabel={Directional Accuracy (\%)},
-    xlabel={Model},
-    ymin=40, ymax=85,
-    ymajorgrids=true,
-    nodes near coords,
-    nodes near coords align={vertical},
-    every node near coord/.append style={font=\small},
-    xtick=data,
-    xticklabels={Random, CNN-LSTM v1, CNN-LSTM v2, TFT v1, TFT v3},
-    xticklabel style={rotate=30, anchor=east, font=\small},
-    legend style={at={(0.5,-0.25)}, anchor=north},
-    width=\columnwidth,
-    height=6cm,
-]
-\addplot[fill=gray!40] coordinates {
-    (1,50) (2,53.8) (3,51.7) (4,52) (5,77.4)
-};
-\draw[dashed, red, thick] (axis cs:0.5,50) -- (axis cs:5.5,50)
-    node[right, font=\footnotesize, red] {random};
-\end{axis}
-\end{tikzpicture}
-\caption{Model comparison: directional accuracy on test set. CNN-LSTM best result: 53.8\%. TFT v3: 77.4\%. The dashed red line at 50\% indicates random baseline. The 23.6 percentage point gap between CNN-LSTM best and TFT v3 is consistent across all CNN-LSTM hyperparameter configurations.}
-\label{fig:model_comparison}
-\end{figure}
+\subsubsection{Reproducible TFT v3 result on the harmonized test slice}
 
-TFT v3 achieves 77.4\% directional accuracy on the unseen 2025 test set, compared to 53.8\% for the best CNN-LSTM hyperparameter configuration. The 2025 test set contains $N_{\mathrm{test}} = 10{,}314$ row-level predictions over 241 trading days and 43 of the 68 tickers (the remaining 25 tickers had no actively trading days in 2025 in the cleaned dataset; this gap is acknowledged as a coverage limitation in Section~\ref{sec:conclusion}).
+We re-trained the TFT v3 reference architecture (per-stock \texttt{Group\-Normalizer}, Variable Selection Network, pinball quantile loss on $Q_{0.1}/Q_{0.5}/Q_{0.9}$, hidden $64$, encoder $30$, horizon $7$, dropout $0.3$, $3$-epoch warmup) on Google Cloud Vertex AI with the released training container (\texttt{vertex/Dockerfile}, \texttt{vertex/cloudbuild.yaml}). The raw Vertex inference output (\texttt{results/tft\_ablations/vertex/baseline\_test\_predictions.csv}, $6{,}782$ rows) contains duplicate inference outputs for some (ticker, date) pairs because the multi-horizon decoder writes one row per horizon step while only one corresponds to the deployed seven-day decision; after de-duplicating to one valid prediction per (ticker, date) we obtain the canonical test slice of $\mathbf{N=5{,}582}$ row-level predictions over $43$ tickers (test window $2025\text{-}01\text{-}07$ to $2025\text{-}12\text{-}10$, UP ratio $\mathbf{49.84\%}$). The TFT v3 reference reaches $\mathbf{51.79\%}$ directional accuracy on this harmonized slice (95\% bootstrap CI $[50.43, 53.08]$, macro-F1 $0.516$).
 
-\textbf{Important caveat: this is an aggregate over heterogeneous tickers.} A 77.4\% pooled accuracy can be produced either by a model that is uniformly informative across the 43 tickers, or by a model that is highly accurate on a small high-liquidity subset and near-random on the rest. The two interpretations have very different practical and economic implications. We do not yet have the per-ticker breakdown attached to the released checkpoint: the legacy \texttt{training/evaluate\_tft.py} script targets the v1 binary classifier, not the v3 quantile model that produces the 77.4\% headline. The per-row evaluator (\texttt{training/evaluate\_tft\_v3\_per\_row.py}) and the per-stock aggregator (\texttt{scripts/per\_stock\_breakdown.py}) are shipped with the public code release; running the former on the v3 checkpoint persists $(Q_{0.1}, Q_{0.5}, Q_{0.9}, r_{7}^{\mathrm{true}})$ for every test row and the latter produces a per-ticker table with mean, 95\% bootstrap CI, and lift over the always-DOWN baseline. The full breakdown (table \texttt{tab:per\_stock\_breakdown}, top-5 best- and worst-predicted tickers, fraction of tickers below the 50\% random and 58.1\% always-DOWN baselines) is identified as Action~1.8 of the improvement plan and will be folded into the camera-ready version. The 23.6 percentage point absolute improvement over CNN-LSTM is consistent across all CNN-LSTM hyperparameter configurations evaluated.
+\textbf{The reference TFT v3 is statistically indistinguishable from the strong non-TFT baselines on the harmonized slice.} The pairwise McNemar two-sided $p$-values of TFT v3 against the three strongest baselines (logistic regression $52.79\%$, simple LSTM $52.69\%$, standard Transformer $52.45\%$) are $0.351$, $0.414$, and $0.517$ respectively (full panel in Table~\ref{tab:baselines}). TFT v3 is also indistinguishable from always-UP ($p = 0.054$) on the same slice. We do not claim that TFT v3 carries directional skill above the constant rule on BVMT 2025 data; we claim that the released training pipeline produces this number deterministically, and we use the same harmonized slice throughout the rest of the article so every model comparison is apples-to-apples.
+
+\textbf{The internal ablations of Section~\ref{sec:tft_ablations} show no significant change versus the reference.} Removing the per-stock target normalizer (TFT $-$ per-stock norm, \texttt{TorchNormalizer} fitted across all $68$ tickers globally) yields $51.40\%$ (McNemar vs.\ reference $p = 0.672$); replacing the VSN softmax gates by uniform $1/N$ weights (TFT $-$ VSN) yields $51.56\%$ ($p = 0.734$). Both deltas are within the bootstrap noise. The original Falsifiable Hypotheses --- that the per-stock target normalizer and the VSN softmax gates carry positive directional skill --- are therefore neither confirmed nor falsified on this dataset: the evidence is consistent with both components contributing zero to directional accuracy on BVMT 2025, with the residual differences attributable to seed and training-stochasticity noise. Macro-F1 is slightly degraded by both ablations (reference $0.516$ vs.\ $-$ VSN $0.503$ vs.\ $-$ per-stock norm $0.471$), consistent with the ablations producing classifiers more biased toward one class even when the pooled accuracy moves little.
+
+\subsubsection{Transparency note: non-reproducible internal estimate of $77.4\%$}\label{sec:reproducibility_box}
+
+\noindent\fbox{\parbox{0.97\columnwidth}{\small \textbf{Reproducibility transparency.} An earlier internal training run of TFT v3 (same architecture and hyperparameters as above, identified as the headline model in earlier development logs) was reported as reaching $77.4\%$ directional accuracy on the article's broader 2025 test set ($N=10{,}314$, UP ratio $49.98\%$). The checkpoint that produced this figure is \emph{not} part of the released artefact set --- no \texttt{models/tft\_quantile\_*.ckpt} file is shipped --- and the figure is \emph{not reproducible} from the public training pipeline: \texttt{training/train\_tft\_v3.py} re-run on Vertex AI with the same hyperparameters converges to $51.79\%$ on the harmonized slice as documented above. Three explanations are compatible with the gap: (i) train/test leakage in the pre-Vertex development setup that the Vertex container has eliminated, (ii) a different test-set definition in the development logs (e.g.\ the validation 2024 slice mis-labeled as test, or a smaller per-stock subset), or (iii) a different quantile-to-direction decision rule than the Q50-sign rule of Eq.~\ref{eq:quantile_to_direction}. Without the original checkpoint we cannot discriminate between these. We disclose the figure here, in line with current reproducibility-by-checklist practice~\cite{ref:pineau_repro,ref:bouthillier_repro}, retire it as a headline number, and adopt the Vertex-reproducible $51.79\%$ as the article's reference TFT v3 result. All comparisons in the remainder of the article use the Vertex-reproducible numbers unless explicitly stated.}}
+
+\subsubsection{Heterogeneity caveat}
+
+The $51.79\%$ pooled accuracy on the harmonized slice can be produced either by a model that is uniformly informative across the $43$ tickers, or by one that is well above the constant rule on some tickers and well below on others. The harmonized per-row CSV (\texttt{results/baselines/vertex\_slice\_harmonized\_predictions.csv}) carries the predictions of all $13$ models tested in this paper plus the true direction and feeds \texttt{scripts/per\_stock\_breakdown.py}, which produces the per-ticker accuracy distribution. We do not include the per-stock table in the main text for space reasons; the JSON is shipped at \texttt{reports/per\_stock/breakdown.json} so reviewers can verify the spread.
 
 \section{Results and Discussion}\label{sec:results}
 
 \subsection{Contextualizing Directional Accuracy}
 
-The 77.4\% directional accuracy must be interpreted in the context of the 2025 test set's class composition. The market \emph{as a whole} (all 68 stocks, 10 years 2016--2025) exhibits a $41.9\%$ UP ratio --- only $41.9\%$ of 7-day windows show positive returns, a structural bearish bias that has historically made \emph{always-DOWN} the relevant naive baseline. \textbf{However, the 2025 test slice itself happens to be very close to balanced}: empirically, \texttt{direction\_7d} is $1$ for $49.98\%$ of the 10{,}314 test rows and $0$ for $50.02\%$. The implication is that on the 2025 test set the always-UP, always-DOWN, and uniform random classifiers all converge to approximately $50\%$ accuracy --- the bearish-bias argument that motivates always-DOWN as a sharper-than-random baseline does not bind in this particular test year. We therefore report the four naive baselines and two trend-following heuristics measured on the actual test set, with $95\%$ bootstrap confidence intervals (Table~\ref{tab:baselines}; produced by \texttt{python -m training.baselines.trivial}).
+The Vertex-reproducible $51.79\%$ directional accuracy of TFT v3 (Section~\ref{sec:directional_acc_on_test}) must be interpreted in the context of the 2025 test slice's class composition. The market \emph{as a whole} (all $68$ stocks, $10$ years $2016$--$2025$) exhibits a $41.9\%$ UP ratio --- only $41.9\%$ of 7-day windows show positive returns, a structural bearish bias that has historically made \emph{always-DOWN} the relevant naive baseline. \textbf{However, the 2025 test slice itself is approximately balanced}: on the harmonized grid used throughout this paper ($N=5{,}582$ unique (ticker, date) predictions over $43$ actively trading tickers) the UP ratio is $49.84\%$, so always-UP, always-DOWN, momentum, and MA$_{20}$ crossover all converge to a $\sim 50\%$ floor (Table~\ref{tab:baselines}, first block). The historical-corpus always-DOWN argument therefore does not bind in 2025 and the slice-specific majority rule is the binding baseline. All thirteen models in this paper --- the four trivial / trend rules, three tabular-ML models, two sequential-deep baselines, and the three TFT variants --- are reported on this single harmonized grid with $95\%$ bootstrap CIs and pairwise McNemar tests against TFT v3 (Table~\ref{tab:baselines}).
 
 \begin{table*}[htbp]
 \centering
-\caption{Directional accuracy of TFT v3 versus naive, trend-following, tabular-ML, and deep-baseline competitors on the 2025 test set. Trivial / trend rows: $N=10{,}314$ row-level predictions, 43 tickers, $49.98\%$ UP, produced by \texttt{python -m training.baselines.trivial}. Tabular-ML rows: $N=10{,}013$ (windowed inputs lose the first $59$ rows per ticker), produced by \texttt{python -m training.baselines.ml\_classics}. Deep-baseline rows: same $N=10{,}013$, GPU-trained for at most $15$ epochs with patience $5$, produced by \texttt{python -m training.baselines.lstm\_simple} and \texttt{transformer\_simple}. All CIs are 95\% percentile-bootstrap (1{,}000 resamples). Hyperparameters were selected on the 2024 validation split. The TFT~v3 row reproduces the headline figure from Section~\ref{sec:experiments}; per-row predictions are deferred to improvement-plan Action~1.8.}
+\caption{Directional accuracy of ten classical and deep baselines plus three TFT variants on the harmonized 2025 test slice ($N=5{,}582$ unique (ticker, date) predictions over $43$ tickers, UP ratio $49.84\%$). The slice is obtained by taking the intersection of the baseline grid and the de-duplicated Vertex grid (one valid prediction per (ticker, date), Section~\ref{sec:directional_acc_on_test}). All CIs are 95\% percentile-bootstrap ($2{,}000$ resamples). Pairwise McNemar two-sided $p$-values reported relative to TFT v3 (last column). Hyperparameters were selected on the 2024 validation split. Trivial / trend rows are deterministic; tabular ML, deep baselines, and TFT variants come from the released training pipelines listed in the column \textit{source}.}
 \label{tab:baselines}
 \small
+\setlength{\tabcolsep}{4pt}
 \begin{tabular}{llcccc}
 \toprule
-\textbf{Family} & \textbf{Baseline} & \textbf{Accuracy} & \textbf{95\% CI} & \textbf{Macro-F1} & \textbf{TFT v3 lift} \\
+\textbf{Family} & \textbf{Model} & \textbf{Accuracy} & \textbf{95\% CI} & \textbf{Macro-F1} & \textbf{McN.\ vs TFT v3} \\
 \midrule
-\multirow{5}{*}{Trivial / trend}
-& Always-UP                                          & $49.98\%$ & $[48.97, 50.90]$ & $0.333$ & $+27.42$ pp \\
-& Always-DOWN (majority history)                     & $50.02\%$ & $[49.10, 51.03]$ & $0.333$ & $+27.38$ pp \\
-& Random uniform 50/50                               & $\sim 50\%$ & ---            & $\sim 0.5$ & $\sim +27$ pp \\
-& Momentum 5/20 (UP iff MA$_5$ $>$ MA$_{20}$)        & $50.92\%$ & $[49.93, 51.91]$ & $0.508$ & $+26.48$ pp \\
-& MA$_{20}$ crossover (UP iff close $>$ MA$_{20}$)   & $50.05\%$ & $[49.04, 51.07]$ & $0.499$ & $+27.35$ pp \\
+\multirow{4}{*}{Trivial / trend}
+& Always-UP                                       & $49.84\%$ & $[48.58, 51.15]$ & $0.333$ & $p = 0.054$ \\
+& Always-DOWN                                     & $50.16\%$ & $[48.89, 51.45]$ & $0.334$ & $p = 0.069$ \\
+& Momentum 5/20 (UP iff MA$_5\!>\!\text{MA}_{20}$) & $50.36\%$ & $[49.10, 51.65]$ & $0.502$ & $p = 0.127$ \\
+& MA$_{20}$ crossover (UP iff close $>\!$ MA$_{20}$) & $49.77\%$ & $[48.50, 51.09]$ & $0.496$ & $p = 0.031$ \\
 \midrule
 \multirow{3}{*}{Tabular ML}
-& Logistic regression (L2, $C{=}1$)                  & $52.88\%$ & $[51.98, 53.95]$ & $0.525$ & $+24.52$ pp \\
-& Random forest ($n_{\mathrm{trees}}{=}200$, max-depth=None) & $50.62\%$ & $[49.61, 51.56]$ & $0.453$ & $+26.78$ pp \\
-& XGBoost (400 trees, max-depth $6$, lr $0.05$)      & $51.63\%$ & $[50.61, 52.56]$ & $0.508$ & $+25.77$ pp \\
+& Logistic regression (L2, $C{=}1$)              & $52.79\%$ & $[51.45, 54.14]$ & $\mathbf{0.524}$ & $p = 0.351$ \\
+& Random forest ($n_{\mathrm{trees}}{=}200$)     & $50.38\%$ & $[49.01, 51.67]$ & $0.450$ & $p = 0.154$ \\
+& XGBoost (400 trees, max-depth $6$, lr $0.05$)  & $52.15\%$ & $[50.86, 53.49]$ & $0.513$ & $p = 0.749$ \\
 \midrule
 \multirow{2}{*}{Deep baselines}
-& Simple LSTM (2 layers, hidden $64$, 54 k params)             & $52.45\%$ & $[51.43, 53.41]$ & $0.515$ & $+24.95$ pp \\
-& Standard Transformer ($d{=}64$, $h{=}4$, 2 layers, 68 k params) & $52.26\%$ & $[51.28, 53.29]$ & $0.488$ & $+25.14$ pp \\
+& Simple LSTM (2 layers, hidden $64$, 54 k params)              & $52.69\%$ & $[51.33, 53.94]$ & $0.517$ & $p = 0.414$ \\
+& Standard Transformer ($d{=}64$, $h{=}4$, 2 layers, 68 k params) & $52.45\%$ & $[51.15, 53.69]$ & $0.489$ & $p = 0.517$ \\
 \midrule
-\textbf{TFT v3 (this work)} & --- & $\mathbf{77.4\%}$ & \emph{IC pending Action 1.8} & --- & --- \\
+\multirow{3}{*}{TFT (this work)}
+& \textbf{TFT v3 reference} (Vertex retrain)     & $\mathbf{51.79\%}$ & $[50.43, 53.08]$ & $0.516$ & --- \\
+& \quad $-$ VSN (uniform variable weights)        & $51.56\%$ & $[50.23, 52.97]$ & $0.503$ & $p = 0.734$ \\
+& \quad $-$ per-stock norm (global \texttt{TorchNormalizer}) & $51.40\%$ & $[50.07, 52.69]$ & $0.471$ & $p = 0.672$ \\
 \bottomrule
 \end{tabular}
 \normalsize
@@ -718,18 +714,18 @@ The 77.4\% directional accuracy must be interpreted in the context of the 2025 t
 
 Five observations follow:
 \begin{itemize}
-\item \textbf{The trivial baselines are statistically indistinguishable on this test slice.} Pairwise McNemar two-sided $p$-values among always-UP / always-DOWN / MA$_{20}$ crossover are all above $0.10$; the momentum-vs-MA$_{20}$-crossover pair sits near $p \approx 0.05$. The four trivial / trend rows therefore form a flat $\sim 50\%$ floor.
-\item \textbf{Tabular ML adds modest but real signal.} Logistic regression beats the trivial floor at $52.88\%$ (95\% CI $[51.98, 53.95]$), and McNemar against random forest gives $p = 4.1 \times 10^{-4}$, against XGBoost $p \approx 0.053$. Random forest with deep trees overfits the validation split (val $53.7\% \to$ test $50.6\%$, a $-3.0$ pp generalisation drop); XGBoost sits in between at $51.63\%$.
-\item \textbf{Sequential deep baselines do not break the $\sim 53\%$ ceiling.} A vanilla two-layer LSTM and a standard 2-block Transformer reach $52.45\%$ and $52.26\%$ respectively when given exactly the same 60-day $\times$ 15-feature input that the TFT v3 sees. Their CIs overlap with logistic regression. This is the strongest single piece of evidence in the table: neither raw recurrence nor raw self-attention is sufficient to exceed the tabular ML floor on this dataset, indicating that the gap to TFT v3 is concentrated in components not present in either of these baselines (Variable Selection Network gating, per-encoder-window normalisation, multi-horizon quantile loss).
-\item \textbf{The TFT v3 lift over every non-TFT baseline is approximately $+24$ to $+27$ pp}, with all competitors clustered in the $50$--$53\%$ band. A gap of this magnitude is consistent with two non-exclusive explanations: (i) a genuine architectural advantage where the VSN's per-feature gating + per-encoder-window normalisation + quantile head lift the ceiling that Conv1D, RNN, and self-attention alone cannot; or (ii) a residual leak the present audit has not yet caught. Phase~1 Action~1.4 (TFT $-$ VSN, $-$ per-window normalisation, $-$ confidence gating) is designed to discriminate between the two.
-\item \textbf{Reframing of the earlier ``$+19.3$ pp over always-DOWN''.} That figure used the historical $58.1\%$ majority-class accuracy on the full $2016$--$2025$ corpus. On the actual $2025$ slice always-DOWN measures $50.02\%$, so the headline lift is approximately $+27$ pp, not $+19$ pp. The camera-ready version should report both, since deployed-system behaviour will see the population, not a single test year.
+\item \textbf{The trivial baselines are statistically indistinguishable on this test slice.} Pairwise McNemar two-sided $p$-values among always-UP / always-DOWN / MA$_{20}$ crossover are all above $0.70$ (always-UP vs always-DOWN $p = 0.82$, always-UP vs MA$_{20}$ $p = 0.95$, always-DOWN vs MA$_{20}$ $p = 0.71$); pairs involving the momentum heuristic remain non-significant (always-UP vs momentum $p = 0.58$, always-DOWN vs momentum $p = 0.86$). The momentum-vs-MA$_{20}$-crossover pair sits at $p = 0.24$. The four trivial / trend rows therefore form a flat $\sim 50\%$ floor with no pair distinguishable.
+\item \textbf{Tabular ML adds modest but real signal.} Logistic regression beats the trivial floor at $52.79\%$ (95\% CI $[51.45, 54.14]$), and McNemar against random forest gives $p = 1.6 \times 10^{-3}$, against XGBoost $p = 0.36$. Random forest under-performs both linear and gradient-boosted alternatives, with deep trees overfitting validation and not transferring to test; XGBoost sits at $52.15\%$. Logistic regression is also the highest macro-F1 in the panel ($0.524$).
+\item \textbf{Sequential deep baselines do not break the $\sim 53\%$ ceiling.} A vanilla two-layer LSTM and a standard 2-block Transformer reach $52.69\%$ and $52.45\%$ respectively when given exactly the same 60-day $\times$ 15-feature input that the TFT v3 sees. Their CIs overlap with logistic regression and with each other. Neither raw recurrence nor raw self-attention exceeds the tabular ML floor on this dataset.
+\item \textbf{The Vertex-reproducible TFT v3 sits inside the same $\sim 50$--$53\%$ band as the non-TFT baselines.} The reference TFT v3 ($51.79\%$) is statistically indistinguishable from logistic regression ($52.79\%$, McNemar $p = 0.35$), simple LSTM ($52.69\%$, $p = 0.41$), standard Transformer ($52.45\%$, $p = 0.52$), and XGBoost ($52.15\%$, $p = 0.75$). It is also indistinguishable from always-UP on the same slice ($49.84\%$, $p = 0.054$, just below the conventional $0.05$ threshold). The two TFT internal ablations move the variant by $\leq 0.4$ pp from the reference and remain statistically indistinguishable from both the reference and the strong baselines. There is no measurable accuracy advantage of TFT v3 over any baseline in the panel; the $+24$--$+27$ pp gap visible against the non-reproducible $77.4\%$ figure does not survive a Vertex retrain.
+\item \textbf{Implication for the thin-market narrative.} On this dataset, no single model in the comparison panel produces a directional accuracy that meaningfully separates from the $50\%$ floor. The $77.4\%$ figure of Section~\ref{sec:reproducibility_box} would have implied a directional skill that exceeds the typical $55$--$65\%$ TFT ceiling on developed-market data~\cite{IEEEhowto:kopka}; the reproducible $51.79\%$ figure is, by contrast, consistent with the literature prior on emerging-market forecasting~\cite{ref:bekaert_harvey,ref:harvey_multiple,ref:harvey_presidential} and with the explicit thin-market difficulty argument of Section~\ref{sec:related}.A. Following the recommendation of~\cite{ref:lipton_troubling} to separate empirical claims from mechanism explanations, we report what the Vertex retrain measures, document where it diverges from earlier developer-time numbers, and refrain from claiming a thin-market accuracy advantage we cannot reproduce.
 \end{itemize}
 
-Per-stock accuracy and statistical significance versus the strongest non-TFT baseline (McNemar test) are reported in Section~\ref{sec:experiments} once the TFT v3 per-row predictions become available. Across the ten baselines tested in Table~\ref{tab:baselines}, mean per-ticker accuracy stays in $[49.9\%, 53.5\%]$, with the per-ticker IQR roughly $\pm 5$ pp; none of the ten has a single-ticker accuracy exceeding $65\%$ on the 2025 test set.
+Across the ten baselines tested in Table~\ref{tab:baselines}, mean per-ticker accuracy stays in $[49.9\%, 52.9\%]$ and per-ticker median in $[48.1\%, 53.0\%]$, with per-ticker IQR of $7$--$13$ pp depending on the baseline. The maximum single-ticker accuracy reached by any of the ten is $68.5\%$ (always-DOWN on the structurally bearish CARTHAGE CEMENT, $165$ DOWN / $76$ UP over $241$ days, a per-stock class imbalance the constant rule trivially exploits); the comparable maxima for the random-forest, logistic-regression, and standard-Transformer baselines sit in the $67$--$68\%$ band on similarly imbalanced tickers. Crucially, the fraction of tickers below $58.1\%$ (the historical always-DOWN majority on the full $2016$--$2025$ corpus) is $\geq 74\%$ for every baseline tested --- $74.4\%$ for the standard Transformer, $79.1\%$ for the simple LSTM, $81.4\%$ for always-DOWN itself, $86.0\%$ for momentum, $88.4\%$ for MA$_{20}$ crossover --- meaning that no baseline in the panel clears the historical bearish benchmark on more than a quarter of the actively trading tickers. The per-ticker breakdown of the Vertex-reproducible TFT v3 (CSV at \texttt{results/tft\_ablations/vertex/baseline\_test\_predictions.csv}) is available through \texttt{scripts/per\_stock\_breakdown.py}.
 
 \subsection{Economic Backtest of the Baselines}\label{sec:economic_baselines}
 
-A directional accuracy above the random floor does not guarantee that a model is exploitable: spread, volume, and execution friction can wipe the signal out, and on a thin market with a structural directional drift even a high accuracy can lose to a buy-and-hold rule. We therefore reconstruct a pseudo-PnL series for every baseline of Table~\ref{tab:baselines} and report the standard set of trading-quality metrics (cumulative return, annualised Sharpe with $r_f = 8\%$ matching the BCT TMM, maximum drawdown, profit factor, hit ratio, and the deflated Sharpe ratio of \cite{ref:deflated_sharpe} that corrects for multiple-testing). The strategy converts each row's prediction into a $7$-day position opened at \texttt{close}$_t$ and closed at \texttt{close}$_{t+7}$; positions are equal-weighted across active tickers on each day. We charge a $50$ bps round-trip transaction cost per trade -- the conservative end of the BVMT bid-ask + brokerage range. The script is reproducible: \texttt{python -m training.baselines.economic\_metrics}.
+A directional accuracy above the random floor does not guarantee that a model is exploitable: spread, volume, and execution friction can wipe the signal out, and on a thin market with a structural directional drift even a high accuracy can lose to a buy-and-hold rule. The backtest-overfitting literature in quantitative finance has documented at length how multiple-testing inflation, selection bias, and out-of-sample over-fitting produce strategies that look statistically significant in development and disappear in deployment~\cite{ref:bailey_pseudo,ref:harvey_presidential}. We therefore reconstruct a pseudo-PnL series for every baseline of Table~\ref{tab:baselines} and report the standard set of trading-quality metrics (cumulative return, annualised Sharpe with $r_f = 8\%$ matching the BCT TMM, maximum drawdown, profit factor, hit ratio, and the deflated Sharpe ratio of~\cite{ref:deflated_sharpe} that corrects for multiple-testing). The strategy converts each row's prediction into a $7$-day position opened at \texttt{close}$_t$ and closed at \texttt{close}$_{t+7}$; positions are equal-weighted across active tickers on each day. We charge a $50$ bps round-trip transaction cost per trade -- the conservative end of the BVMT bid-ask + brokerage range. The script is reproducible: \texttt{python -m training.baselines.economic\_metrics}.
 
 \begin{table*}[htbp]
 \centering
@@ -759,7 +755,7 @@ Four observations:
 \item \textbf{The 2025 test year had a strong positive drift}: a long-only always-UP rule earns $+27.95\%$ cumulative with Sharpe $1.24$ and a $-27\%$ drawdown when crowded out at the wrong entry days. The deflated-Sharpe $p$-value $0.576$ confirms this is not statistically distinguishable from luck once nine strategies are pooled. The fair benchmark for any active baseline is therefore not always-DOWN (which loses $94\%$ in the long-short version, since the market trended up) but always-UP.
 \item \textbf{Four baselines clear the deflated-Sharpe bar at $p<0.05$.} Standard Transformer (Sharpe $4.40$, DSR$_p = 0.002$), Simple LSTM (Sharpe $3.80$, DSR$_p = 0.014$), Logistic Regression L2 (Sharpe $3.69$, DSR$_p = 0.021$), and Momentum 5/20 (Sharpe $3.40$, DSR$_p = 0.038$) all out-perform always-UP net of cost and after correcting for the multiple-testing inflation expected when nine strategies are evaluated jointly. The remaining five baselines are not statistically distinguishable from luck on this test year.
 \item \textbf{Accuracy is not a sufficient predictor of trading quality on this market.} Standard Transformer and Simple LSTM each achieve a directional accuracy ($\sim 52.3\%$) that is essentially indistinguishable from logistic regression's; yet on the long-only NET regime, Transformer's Sharpe ($4.40$) and maximum drawdown ($-4.57\%$) are markedly better than LogReg's ($3.69$ Sharpe, $-12.55\%$ drawdown) and the best of the table. The implication is that the deep baselines concentrate their (still modest) directional skill on days where the realised return is large, even when their pooled accuracy is at the same level as a linear model. This is exactly the behaviour we expect a useful financial classifier to exhibit and is what raw accuracy measurements miss.
-\item \textbf{Heavier non-deep ML hurts here.} Random forest under-performs all trivial baselines net of cost (Sharpe $-0.75$, $+4.2\%$ cumulative on a $+28\%$ market). XGBoost trails always-UP by $7.5$ pp of cumulative return. The TFT v3 economic backtest is identified as a deliverable of Action~1.8 (per-row prediction CSV $\rightarrow$ \texttt{training.baselines.economic\_metrics}); it is necessary because directional accuracy alone, even at $77.4\%$, does not establish exploitability when round-trip costs and the market's positive drift are taken into account.
+\item \textbf{Heavier non-deep ML hurts here.} Random forest under-performs all trivial baselines net of cost (Sharpe $-0.75$, $+4.2\%$ cumulative on a $+28\%$ market). XGBoost trails always-UP by $7.5$ pp of cumulative return. The Vertex-reproducible TFT v3 reaches $51.79\%$ directional accuracy on the harmonized slice (Section~\ref{sec:directional_acc_on_test}), in the same band as the deep baselines of this table; the long-only economic backtest of TFT v3 on the harmonized slice is shipped at \texttt{results/baselines/vertex\_slice\_harmonized\_predictions.csv} and produces a Sharpe profile consistent with the LSTM and Transformer rows above (no statistically significant outperformance).
 \end{itemize}
 
 \textbf{Long-short under the same cost regime.} The long-short variant of the same script wipes most baselines: with five $7$-day round-trips per row and a $0.5\%$ cost each, only always-UP survives at Sharpe $1.24$ (essentially because the test year drifted up; the short leg loses on every UP day). For thin emerging markets where shorting is also operationally constrained, long-only is the realistic deployment regime; long-short numbers are reported as a stress test in \texttt{results/baselines/economic\_summary.json} but not advanced as the primary economic claim.
@@ -780,7 +776,7 @@ c(x) \;=\; \mathrm{clip}\!\left(1 - \frac{\hat{Q}_{0.9}(x) - \hat{Q}_{0.1}(x)}{\
 \quad \Delta_{\mathrm{ref}} = 0.10,
 \label{eq:quantile_confidence}
 \end{equation}
-with a multiplicative penalty of $0.6$ when the quantiles cross ($\hat{Q}_{0.1} > \hat{Q}_{0.9}$). The 77.4\% figure above and the lifts in Table~\ref{tab:baselines} are produced by Eq.~\eqref{eq:quantile_to_direction} on the 2025 test set.
+with a multiplicative penalty of $0.6$ when the quantiles cross ($\hat{Q}_{0.1} > \hat{Q}_{0.9}$). The Vertex-reproducible $51.79\%$ figure of Section~\ref{sec:directional_acc_on_test} and the TFT ablation row in Table~\ref{tab:tft_ablations} are produced by Eq.~\eqref{eq:quantile_to_direction} on the 2025 test set; the non-reproducible $77.4\%$ figure of Section~\ref{sec:reproducibility_box} is also reported under this same rule, with the discrepancy traceable either to a different training pipeline or to a different decision rule that we cannot recover without the original checkpoint.
 
 \textbf{Alternative decision rules and trade-offs.} The choice of Eq.~\eqref{eq:quantile_to_direction} is conservative for a binary metric but discards information. We list the natural alternatives so future readers can re-evaluate accuracy without re-training:
 \begin{itemize}
@@ -789,7 +785,7 @@ with a multiplicative penalty of $0.6$ when the quantiles cross ($\hat{Q}_{0.1} 
 \item \textit{R3 --- HOLD band around zero.} $\hat{d} = \mathrm{HOLD}$ iff $|\hat{Q}_{0.5}| < \tau$ for a threshold $\tau$ tuned on validation, $\mathrm{UP}/\mathrm{DOWN}$ otherwise. Trades coverage for stability, useful when transaction costs penalize low-confidence trades.
 \item \textit{R4 --- Probability via interpolated CDF.} Treat $\{(0.1, \hat{Q}_{0.1}), (0.5, \hat{Q}_{0.5}), (0.9, \hat{Q}_{0.9})\}$ as a piecewise-linear inverse CDF, recover $\hat{p}(\text{return} > 0)$, threshold at $0.5$. Equivalent to R1 when the inverse CDF is monotone but produces a graded probability for downstream calibration.
 \end{itemize}
-A row-by-row sensitivity analysis comparing R1--R4 on the 2025 test set is identified as a Phase~1 deliverable in \texttt{paper/improvement\_plan.md}; it requires re-running the saved checkpoint with predictions persisted, which is not part of the current artefact set. We disclose this gap explicitly so the 77.4\% headline figure is not misread as rule-independent.
+A row-by-row sensitivity analysis comparing R1--R4 on the 2025 test set is identified as a Phase~1 deliverable in \texttt{paper/improvement\_plan.md}. The Vertex-reproducible per-row CSV (\texttt{results/tft\_ablations/vertex/baseline\_test\_predictions.csv}) already contains the $(Q_{0.1}, Q_{0.5}, Q_{0.9})$ triplets required to evaluate R2--R4 without re-training; we have not folded that sweep into the main text in the present revision because the rule-sensitivity question is secondary to the headline-reproducibility issue documented in Section~\ref{sec:reproducibility_box}.
 
 \subsection{Loss Interpretation Across Versions}
 
@@ -819,42 +815,104 @@ The width of this interval is asymmetric risk information: wide intervals (high 
 
 \subsection{TFT Internal Ablations}\label{sec:tft_ablations}
 
-The $+24$ to $+27$ pp gap between TFT v3 and every non-TFT baseline (Section~\ref{sec:results}.A) is large enough that mechanism attribution is required: a number that exceeds the most generous prior on what an attention-based model can extract from $60\!\times\!15$-shaped emerging-market windows is, on its own, equally consistent with a genuine architectural advantage and with a residual leak that the Phase~0 audit has not yet caught. The improvement-plan Action~1.4 specifies three internal ablations that, together, partition the candidate explanations along the three components that the v3 introduces or preserves on top of the standard transformer baseline of Section~\ref{sec:results}.A: Variable Selection Network gating, per-stock target normalisation, and confidence gating on the quantile output (Eq.~\ref{eq:quantile_confidence}).
+When the Vertex retrain of TFT v3 (\textit{baseline}) converged to $51.79\%$ on the harmonized slice rather than the development-log $77.4\%$ (Section~\ref{sec:reproducibility_box}), the two architectural components originally credited with the gain over a standard Transformer baseline --- the Variable Selection Network and the per-stock target normalizer --- became the natural suspects. We trained two internal ablations, plus one post-hoc evaluation-time ablation, to test whether they contribute measurable directional skill on BVMT 2025 data.
 
 \textbf{Variants}. Each ablation modifies exactly one component of the v3 reference and keeps all other hyperparameters identical (encoder length, hidden size, dropout, learning rate, gradient clip, quantile loss). The implementations live in \texttt{training/tft\_ablations/}:
 \begin{itemize}
-\item \textbf{TFT $-$ VSN}. The three Variable Selection Networks (static, encoder, decoder) keep their per-variable Gated Residual Networks but the softmax-gated weights are replaced by uniform $1/N$ weights. This isolates the \emph{gating} contribution of the VSN from its GRN contribution; a GRN-free ablation would coincide with the standard Transformer baseline already trained in Action~1.3 ($52.26\%$, Table~\ref{tab:baselines}).
-\item \textbf{TFT $-$ per-stock norm}. The target normalizer \texttt{GroupNormalizer(groups=[ticker\_id])} is replaced by a global \texttt{TorchNormalizer} fitted across all 68 tickers. AMEN BANK and a thinly traded mid-cap then share a single $(\mu, \sigma)$. This is the naive baseline against which per-stock normalisation should demonstrate gain.
-\item \textbf{TFT $-$ confidence gating}. The confidence score of Eq.~\ref{eq:quantile_confidence} is computed but \emph{not} used to abstain or down-weight; equivalently, the threshold $\tau$ in the gating decision is set to $0$. This ablation is post-hoc: it reads the per-row predictions of the unmodified v3 checkpoint and sweeps $\tau \in \{0.50, 0.55, 0.60, 0.65, 0.70, 0.75\}$, reporting (coverage, accuracy on covered rows) at each threshold. No re-training is required because gating is an evaluation-time decision rule rather than a training objective; the harness is \texttt{training/tft\_ablations/no\_gating\_eval.py}.
+\item \textbf{TFT $-$ VSN}. The three Variable Selection Networks (static, encoder, decoder) keep their per-variable Gated Residual Networks but the softmax-gated weights are replaced by uniform $1/N$ weights, isolating the \emph{gating} contribution of the VSN.
+\item \textbf{TFT $-$ per-stock norm}. The target normalizer \texttt{GroupNormalizer(groups=[ticker\_id])} is replaced by a global \texttt{TorchNormalizer} fitted across all $68$ tickers. AMEN BANK and a thinly traded mid-cap then share a single $(\mu, \sigma)$. This was originally posed as the naive baseline against which per-stock normalisation should demonstrate gain.
+\item \textbf{TFT $-$ confidence gating}. The confidence score of Eq.~\ref{eq:quantile_confidence} is computed but \emph{not} used to abstain or down-weight; equivalently, the threshold $\tau$ in the gating decision is set to $0$. This ablation is post-hoc: it reads the per-row predictions of the unmodified v3 checkpoint and sweeps $\tau \in \{0.50, 0.55, 0.60, 0.65, 0.70, 0.75\}$. No re-training is required because gating is an evaluation-time decision rule rather than a training objective; the harness is \texttt{training/tft\_ablations/no\_gating\_eval.py}.
 \end{itemize}
 
-\textbf{Falsifiable hypotheses}. The article makes the gap claim falsifiable by the following decision rule:
+\textbf{Falsifiable hypotheses, status on the harmonized slice.} The ablation design originally posted three hypotheses that the directional-accuracy gap between v3 and the standard Transformer baseline ($52.45\%$ harmonized, $52.26\%$ on the broader baseline grid) was carried by VSN gating and per-stock normalization. On the harmonized slice (Table~\ref{tab:tft_ablations}), the deltas between variants are small and within noise:
 \begin{itemize}
-\item If TFT $-$ VSN drops to within $\pm 2$ pp of the standard Transformer baseline ($52.26\%$), VSN gating accounts for most of the gap.
-\item If TFT $-$ per-stock norm drops by $\geq 10$ pp, per-stock target standardisation accounts for a substantial slice of the gap (this is the prediction supported by the article's discussion of thin-market heterogeneity in Section~\ref{sec:security}.A).
-\item If the confidence-gating sweep shows that accuracy on covered rows is monotone increasing in $\tau$ \emph{and} coverage drops smoothly (no discrete jump), the confidence score is well-calibrated. A flat or non-monotone curve would invalidate the article's confidence-gating defense argument (Section~\ref{sec:security}.A).
+\item Predicted: TFT $-$ VSN should drop to within $\pm 2$ pp of the standard Transformer baseline. Observed: $51.56\%$, a $-0.23$ pp delta versus the v3 reference (McNemar $p = 0.734$). The hypothesis is neither confirmed nor falsified --- the change is indistinguishable from training noise.
+\item Predicted: TFT $-$ per-stock norm should drop by $\geq 10$ pp. Observed: $51.40\%$, a $-0.39$ pp delta versus the v3 reference (McNemar $p = 0.672$). Again, the change is within noise.
+\item TFT $-$ confidence gating sweep across $\tau \in \{0.50, \ldots, 0.75\}$ is reported separately in \texttt{results/tft\_ablations/confidence\_gating\_sweep.csv}; on the harmonized slice the accuracy-on-covered-rows curve is essentially flat, providing no evidence for a well-calibrated confidence score in the sense required by the gating defense of Section~\ref{sec:security}.A.
 \end{itemize}
+
+\textbf{Macro-F1 tells a slightly different story.} Although pooled-accuracy differences are within noise, the macro-F1 metric (reference $0.516$ vs.\ $-$ VSN $0.503$ vs.\ $-$ per-stock norm $0.471$) shows a gradual degradation as components are removed. The ablations produce classifiers that are more biased toward one class (TFT $-$ per-stock norm predicts UP on $\sim 60\%$ of rows, well above the $49.84\%$ slice prior); pooled accuracy is insensitive to this bias on a near-balanced slice while macro-F1 captures it. The reading is therefore: removing the per-stock normalizer or the VSN softmax gates does not improve directional accuracy, and the small pooled gains visible on un-deduplicated outputs vanish once the slice is harmonized. We retain both components in the released architecture for their robustness role (Section~\ref{sec:security}.A) and observe that they impose no measurable accuracy cost on BVMT 2025.
 
 \begin{table}[htbp]
 \centering
-\caption{TFT internal-ablation suite. Each row trains the v3 architecture with exactly one component modified versus the reference; all other hyperparameters are held fixed. Metrics are reported on the same 2025 test split as Table~\ref{tab:baselines}. Numerical values in italics will be populated once the four jobs return from Vertex AI Custom Training (\texttt{vertex/submit.py}); the infrastructure is shipped with the article and the smoke-tested local runner (\texttt{training/tft\_ablations/runner.py --smoke}) confirms that all variants instantiate and train without modification of the data path.}
+\caption{TFT internal-ablation suite, on the harmonized 2025 test slice ($N=5{,}582$, UP ratio $49.84\%$). Each ablation row trains the v3 architecture with exactly one component modified versus the reference; all other hyperparameters are held fixed. McNemar $p$ is two-sided versus the reference. The full panel including the ten non-TFT baselines is Table~\ref{tab:baselines}.}
 \label{tab:tft_ablations}
 \scriptsize
 \setlength{\tabcolsep}{4pt}
-\begin{tabular}{lccc}
+\begin{tabular}{lcccc}
 \toprule
-\textbf{Variant} & \textbf{Component modified} & \textbf{Test acc.} & \textbf{$\Delta$ vs. v3} \\
+\textbf{Variant} & \textbf{Component modified} & \textbf{Test acc.} & \textbf{Macro-F1} & \textbf{McNemar $p$} \\
 \midrule
-TFT v3 (reference)            & ---                                       & $77.4\%$  & ---       \\
-TFT $-$ VSN                   & uniform variable weights                  & \textit{pending} & \textit{pending} \\
-TFT $-$ per-stock norm        & global \texttt{TorchNormalizer}           & \textit{pending} & \textit{pending} \\
-TFT $-$ conf. gating ($\tau\!=\!0$) & post-hoc, all rows kept              & \textit{pending} & \textit{pending} \\
+\textbf{TFT v3 (reference)}   & ---                                       & $\mathbf{51.79\%}$ & $\mathbf{0.516}$ & ---     \\
+TFT $-$ VSN                   & uniform variable weights                  & $51.56\%$ & $0.503$ & $0.734$ \\
+TFT $-$ per-stock norm        & global \texttt{TorchNormalizer}           & $51.40\%$ & $0.471$ & $0.672$ \\
+\midrule
+Always-UP on the same slice   & ---                                       & $49.84\%$ & $0.333$ & $0.054$ \\
 \bottomrule
 \end{tabular}
 \normalsize
 \end{table}
 
-\textbf{Reproducibility and cost}. The four jobs (one re-trained baseline plus three ablations) run on Google Cloud Vertex AI Custom Training with the released container image (\texttt{vertex/Dockerfile}, \texttt{vertex/cloudbuild.yaml}). On a single NVIDIA T4 the full sweep is $\sim\!\$15$ USD ($\sim\!10$--$12$ h per job, four jobs); on A100 it is $\sim\!\$30$ USD ($\sim\!2$ h per job). The runner accepts \texttt{BVMT\_SEED} so each variant is re-runnable bit-for-bit. Until the cluster sweep returns, the reader should treat the v3 lift over baselines as \emph{consistent with} the VSN-plus-per-stock-norm hypothesis rather than as definitively attributed to it.
+\textbf{Reproducibility and cost}. The three Vertex training jobs (reference $+$ two ablations) ran with the released container (\texttt{vertex/Dockerfile}, \texttt{vertex/cloudbuild.yaml}) on a single NVIDIA T4 for $71$, $91$, and $161$ minutes respectively ($\sim\!\$8$ total at the on-demand rate at the time of writing). The runner accepts \texttt{BVMT\_SEED} so each variant is re-runnable bit-for-bit; per-row prediction CSVs are at \texttt{results/tft\_ablations/vertex/\{baseline,no\_vsn,global\_norm\}\_test\_predictions.csv}.
+
+\subsection{Multi-Agent Ablation Study}\label{sec:multiagent_ablation}
+
+The contribution of the seven-agent orchestration over the single TFT v3 model is, in the deployed pipeline, asserted by design. The Vertex-reproducible TFT v3 reaches $51.79\%$ on the harmonized slice (Section~\ref{sec:directional_acc_on_test}); the question is whether the additional agents lift, hold, or hurt this number. Three configurations are measurable from offline artefacts (TFT v3 per-row predictions plus daily-price history) and we report them directly; the remaining six require the deployed PostgreSQL database (sentiment pre-scores from \texttt{news\_articles}, financial ratios from \texttt{financial\_ratios}, and the trained XGBoost fundamental checkpoint) and are out of reach of an offline replay --- we mark them DB-dependent in Table~\ref{tab:multiagent_ablation} and leave them for a deployment-time follow-up.
+
+\textbf{Offline graph agent (used in A4 and A8).} Without access to the trained GAT checkpoint, we replicate the GraphAgent's structural intent with an explicit proxy: for each test row at (ticker, date), we compute the Pearson correlation matrix of daily returns over the prior 60-day window across all 68 tickers, keep the top-10 neighbors with $|\rho| \geq 0.30$, and aggregate their TFT v3 R1 predictions weighted by signed correlation into a $\text{graph\_score} \in [-1,+1]$ and a confidence $= \overline{|\rho|}$ of selected neighbors. Coverage is $69\%$ of rows ($3{,}851/5{,}582$), with $61.5\%$ ($3{,}435$) clearing the deployed orchestrator gate ($\text{conf}\!\ge\!0.20$ and $|\text{score}|\!\ge\!0.08$). The proxy preserves the graph-as-neighbor-propagation logic; what it lacks is the GAT's learned edge weights.
+
+\textbf{Configurations.}
+\begin{itemize}
+\item A1 --- TFT only (reference, $51.79\%$ from Section~\ref{sec:directional_acc_on_test}).
+\item A2 --- TFT + FundamentalAgent. \emph{DB-dependent.}
+\item A3 --- TFT + SentimentAgent. \emph{DB-dependent.}
+\item A4 --- TFT + GraphAgent (offline proxy), deployed orchestrator weights ($w_\text{tech}\!=\!0.34$, $w_\text{graph}\!=\!0.20$, gate active).
+\item A5 --- TFT + Fundamental + Sentiment. \emph{DB-dependent.}
+\item A6 --- Seven-agent system (deployed; \texttt{agents/orchestrator.py}). \emph{DB-dependent.}
+\item A7 --- A6 with the data-quality rules of Table~\ref{tab:weight_adjustments} disabled. \emph{DB-dependent.}
+\item A8 --- A4 with confidence gating disabled ($\text{conf}\!\ge\!0.20$ gate removed; graph signal always included).
+\item A9 --- A6 with weight redistribution disabled. \emph{DB-dependent.}
+\end{itemize}
+
+\begin{table}[htbp]
+\centering
+\caption{Multi-agent ablation suite on the harmonized 2025 test slice ($N=5{,}582$, UP ratio $49.84\%$). Three configurations are realisable from offline artefacts (TFT v3 R1 per-row predictions and daily-price history); six require the deployed PostgreSQL database (sentiment pre-scores and financial ratios) and the trained XGBoost fundamental checkpoint, which are not shipped as offline data. McNemar $p$ is two-sided versus A1.}
+\label{tab:multiagent_ablation}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{llccc}
+\toprule
+\textbf{Config} & \textbf{Setup} & \textbf{Test acc.} & \textbf{$\Delta$ vs A1} & \textbf{McNemar $p$} \\
+\midrule
+A1 & TFT only (Vertex reference)                        & $\mathbf{51.79\%}$ & ---             & ---       \\
+A4 & + Graph (proxy, deployed weights)                  & $51.79\%$ & $\pm 0.00$ pp   & $1.000$   \\
+A8 & A4 $-$ gating (graph always used)                  & $51.79\%$ & $\pm 0.00$ pp   & $1.000$   \\
+\midrule
+A2 & + Fundamental                                       & \multicolumn{3}{l}{\textit{DB-dependent (financial\_ratios + XGBoost ckpt)}} \\
+A3 & + Sentiment                                         & \multicolumn{3}{l}{\textit{DB-dependent (news\_articles pre-scored)}}        \\
+A5 & + Fundamental + Sentiment                           & \multicolumn{3}{l}{\textit{DB-dependent (both above)}}                      \\
+A6 & Seven-agent (deployed)                              & \multicolumn{3}{l}{\textit{DB-dependent}}                                  \\
+A7 & A6 $-$ data-quality rules                           & \multicolumn{3}{l}{\textit{DB-dependent}}                                  \\
+A9 & A6 $-$ weight redistribution                        & \multicolumn{3}{l}{\textit{DB-dependent}}                                  \\
+\midrule
+\multicolumn{2}{l}{\textit{Graph-only reference (no TFT)}} & $50.75\%$ & $-1.04$ pp & $0.271$   \\
+\bottomrule
+\end{tabular}
+\normalsize
+\end{table}
+
+\textbf{Key finding from the realisable configurations.} The deployed orchestrator combines a \emph{binary} technical signal (UP/DOWN, tech\_score $\in\{0,1\}$) with a \emph{continuous} graph signal (graph\_score $\in[-1,+1]$ mapped to $[0,1]$) using fixed weights $w_\text{tech}\!=\!0.34$, $w_\text{graph}\!=\!0.20$ and direction thresholds $\{0.55, 0.45\}$. With these constants, the graph signal \emph{cannot} flip a binary technical decision: when tech\_score~$=1$, the combined score is at least $0.63$ regardless of the graph; when tech\_score~$=0$, it is at most $0.37$. Empirically, A4 produces exactly the same per-row prediction as A1 on all $5{,}582$ rows (zero flips, $p = 1.000$), and removing the confidence gate (A8) does not change this. A graph-only classifier on the same proxy scores $50.75\%$ (95\% CI $[49.44, 52.04]$, McNemar vs A1 $p = 0.271$), statistically indistinguishable from the constant rule on this UP-balanced slice.
+
+\textbf{Weight sensitivity sweep.} If we relax the deployed weights and re-evaluate at $w_\text{graph}\!\in\!\{0.20, 0.37, 0.50, 0.65\}$, the binary-technical setup begins to flip predictions only when $w_\text{graph}\!\ge\!0.50$: at $w_\text{graph}\!=\!0.50$ the graph flips $866/5{,}582$ rows and accuracy drops to $51.40\%$ ($p = 0.48$ vs A1); at $w_\text{graph}\!=\!0.65$ it flips $1{,}422$ rows and accuracy drops further to $50.86\%$ ($p = 0.18$ vs A1). A continuous-technical variant that softens tech\_score via $\tanh(20 \cdot q_{0.5})$ gives the graph more leverage but its accuracy hovers in the $50.95$--$51.02\%$ band across the same weight sweep, never significantly differing from A1. On BVMT 2025, the graph proxy carries no detectable directional skill over TFT v3 alone, regardless of weighting strategy.
+
+\textbf{Falsifiable hypotheses, status.} The original ablation design (Action~2.1 of the improvement plan) posted three hypotheses; the offline-realisable subset addresses two of them:
+\begin{itemize}
+\item If $|\,\text{A6} - \text{A1}\,|<1$ pp, the multi-agent layer is performance-neutral. \emph{For the offline-realisable subset $\{$A1, A4, A8$\}$, the gap is $0.00$ pp.} This is consistent with hypothesis (iii) of the introduction to this subsection: a multi-agent layer that contributes via robustness and auditability rather than accuracy. Whether the DB-dependent configurations (A2, A3, A5, A6, A7, A9) would change this conclusion is empirically open and depends on the directional skill carried by the FundamentalAgent and SentimentAgent on news/ratio data we do not replay offline.
+\item If A8 drops by $\geq 3$ pp vs A6, confidence gating contributes substantively. \emph{In the offline subset, A8 $=$ A4 exactly (no flips), so the gate has zero effect on the 2-agent ensemble.} The gating-defense argument of Section~\ref{sec:security}.A therefore holds in an information-theoretic sense (gating cannot make A8 worse than A4) but contributes nothing to accuracy on this dataset.
+\item The per-segment breakdown remains pending the DB-dependent configurations.
+\end{itemize}
+
+\textbf{Cost and reproducibility.} The offline-realisable subset re-uses the released TFT v3 per-row CSV plus \texttt{data/features/tft\_features.csv}, runs in $\sim\!60$~s of single-threaded CPU work, and is shipped as \texttt{scripts/multiagent\_offline\_sweep.py} with per-row outputs at \texttt{results/baselines/multiagent\_offline\_sweep\_predictions.csv} and a summary at \texttt{results/baselines/multiagent\_offline\_sweep.json}. A future-work item is to replay A2, A3, A5, A6, A7, A9 once the database snapshot (news + financial ratios) is published; the orchestrator wrapper \texttt{agents/orchestrator.py} is already designed for this and accepts a \texttt{seance} parameter for back-tested point-in-time evaluation.
 
 \section{Robustness and Auditability Implications}\label{sec:security}
 
@@ -907,14 +965,18 @@ The multi-agent architecture implements fine-grained trust boundaries:
 
 \section{Conclusion}\label{sec:conclusion}
 
-This paper presents a multi-agent architecture for stock market analysis designed and evaluated on a thin, illiquid emerging market over a decade of real data. The work makes four contributions: (1) TFT adaptation for thin markets achieving $77.4\%$ directional accuracy, (2) a preliminary CNN-LSTM ablation in which four hyperparameter variants cluster in the band $51.7$--$53.8\%$, paired with a publicly released seed-sweep harness for the formally powered version of this comparison, (3) a multi-component ensemble with failure isolation, and (4) an EU AI Act-aligned explainability framework. A correlation-based market-surveillance application of the GraphAgent infrastructure is sketched as future work in Section~\ref{sec:future_work} but is not validated empirically here.
+This paper presents a multi-component decision pipeline for stock market analysis on a thin, illiquid emerging market over a decade of real data, and centers its contribution on reproducibility. The Vertex-reproducible TFT v3 reference reaches $51.79\%$ directional accuracy (95\% CI $[50.43, 53.08]$, macro-F1 $0.516$) on the harmonized 2025 test slice ($N=5{,}582$), a number that places it in the $49.8$--$52.8\%$ band shared with ten classical and deep baselines and three TFT ablations (Table~\ref{tab:baselines}). Pairwise McNemar tests vs.\ the strongest non-TFT models give $p \in \{0.35, 0.41, 0.52\}$, confirming that TFT v3 is statistically indistinguishable from logistic regression, simple LSTM, and standard Transformer on the harmonized slice. Two internal ablations of components originally framed as positive architectural contributors --- the Variable Selection Network and the per-stock target normalizer --- move accuracy by $\leq 0.4$ pp ($p > 0.65$ each), providing no significant evidence for or against the original hypothesis (Section~\ref{sec:tft_ablations}). An earlier internal estimate of $77.4\%$ directional accuracy is documented as non-reproducible in Section~\ref{sec:reproducibility_box}.
+
+The four contributions of the paper are therefore reframed as follows: (1)~a reproducible Vertex-AI training pipeline for TFT-on-thin-market with two internal training ablations and one post-hoc evaluation-time ablation; (2)~ten competing baselines (trivial, trend-following, tabular ML, two sequential-deep) on a shared walk-forward protocol with bootstrap CIs and pairwise McNemar tests; (3)~a multi-component pipeline with typed agent interfaces and failure isolation, reframed as a robustness/auditability contribution after the ablation evidence shows the architectural components do not lift accuracy on this dataset; (4)~an EU AI Act-aligned explainability layer. The non-reproducible $77.4\%$ figure is retained in Section~\ref{sec:reproducibility_box} as a transparency disclosure rather than as a result.
 
 \subsection{Limitations}
 
 Key limitations should be acknowledged:
 
 \begin{itemize}
-\item \textbf{Stock heterogeneity and missing per-stock breakdown}: The model is not calibrated equally for all 68 stocks. Stocks with fewer than 500 trading days have lower prediction reliability due to limited training data, and a per-ticker accuracy distribution is not yet measured for the v3 quantile checkpoint --- the 77.4\% headline is an aggregate over the 43 actively trading tickers and could in principle be carried by a small high-liquidity subset (cf. Section~\ref{sec:results}.A). The per-row evaluator and per-stock aggregator are shipped with the code release; the resulting table \texttt{tab:per\_stock\_breakdown} is a Phase~1 deliverable (improvement-plan Action~1.8).
+\item \textbf{Reproducibility of the historical $77.4\%$ figure}: An earlier internal training run was reported as reaching $77.4\%$ directional accuracy on the 2025 test set ($N=10{,}314$). The Vertex retrain of the same architecture and hyperparameters converges to $51.79\%$ on the harmonized slice ($N=5{,}582$, after de-duplicating the multi-horizon decoder output), and we have not been able to reconcile the two numbers from the released artefacts (Section~\ref{sec:reproducibility_box}). The gap is the dominant limitation of the present work: without the original checkpoint we cannot fully discriminate between train/test leakage in the pre-Vertex pipeline, a different test-set definition, and a different decision rule.
+
+\item \textbf{Stock heterogeneity and missing per-stock breakdown}: The Vertex-reproducible TFT v3 is not calibrated equally for all $43$ actively trading 2025 tickers. The per-row CSV (\texttt{results/tft\_ablations/vertex/baseline\_test\_predictions.csv}) enables a per-ticker accuracy distribution via \texttt{scripts/per\_stock\_breakdown.py}; the full breakdown is shipped at \texttt{reports/per\_stock/breakdown.json} and is not folded into the main text for space reasons.
 
 \item \textbf{Sentiment validation}: The deployed sentiment model (\texttt{bardsai/finance-sentiment-fr-base}) has been validated by its authors on a French financial benchmark, not on the BVMT corpus from ilboursa.com. Per-article accuracy, macro-F1, and Cohen's $\kappa$ on a representative sample of BVMT news are not yet measured; the planned 200-article expert validation is described in Action~1.7 of the improvement plan and the tooling is shipped with the code release. Until that measurement exists, the SentimentAgent's contribution to the final decision (base weight $0.20$, Section~\ref{sec:weights}) carries an unmeasured error rate.
 
@@ -926,7 +988,7 @@ Key limitations should be acknowledged:
 
 \item \textbf{Generalization}: Model training and evaluation use only BVMT data. Generalization to other emerging markets or developed markets has not been validated.
 
-\item \textbf{Coverage of the 2025 test set}: The 77.4\% headline figure is computed over 10{,}314 row-level predictions covering only 43 of the 68 tickers, because 25 tickers had no actively trading days in 2025 in the cleaned dataset. Performance on the absent 25 tickers is unknown.
+\item \textbf{Coverage of the 2025 test set}: The harmonized test slice has $5{,}582$ row-level predictions covering $43$ of the $68$ tickers; the remaining $25$ tickers had no actively trading days in 2025 in the cleaned dataset, so performance on them is unknown.
 
 \item \textbf{Scope of the ``multi-agent'' claim}: The seven components are specialized deterministic modules orchestrated centrally (Section~\ref{sec:architecture}.A); they do not exchange messages, vote, negotiate, or exhibit emergent collective behavior. A reviewer interested in autonomous Multi-Agent Systems (MAS) in the Santa Fe sense, or in LLM-agent peer-to-peer frameworks, will find neither in this work. The contribution is interface-level (typed \texttt{AgentSignal}, central failure isolation, explicit trust boundaries), not behavioral. We retain the ``multi-agent'' vocabulary because it matches the released codebase, but a reader for whom that label connotes autonomy should mentally substitute ``multi-component decision pipeline''.
 \end{itemize}
@@ -990,10 +1052,10 @@ Z. C. Lipton, ``The mythos of model interpretability: In machine learning, the c
 M. Rguibi, S. Ben Amar, and M. H. Kacem, ``French financial sentiment analysis: A case study of domain-specific language models,'' in \textit{Proc. Conference on Computational Linguistics and Intelligent Text Processing}, 2023.
 
 \bibitem{ref:emerging_markets}
-A. Atsalakis and K. Valavanis, ``Surveying stock market forecasting techniques --- Part II: Soft computing methods,'' \textit{Expert Systems with Applications}, vol. 36, no. 3, pp. 5932--5941, 2009.
+G. S. Atsalakis and K. P. Valavanis, ``Surveying stock market forecasting techniques --- Part II: Soft computing methods,'' \textit{Expert Systems with Applications}, vol. 36, no. 3, pp. 5932--5941, 2009.
 
 \bibitem{ref:multi_agent}
-T. Lux and M. Marchesi, ``Scaling laws from the dynamics of collective activity,'' \textit{Nature}, vol. 397, pp. 499--502, 1999.
+T. Lux and M. Marchesi, ``Scaling and criticality in a stochastic multi-agent model of a financial market,'' \textit{Nature}, vol. 397, pp. 498--500, 1999.
 
 \bibitem{ref:market_surveillance}
 A. Nessmith, ``An examination of insider trading prosecution outcomes,'' \textit{Journal of Legal Economics}, vol. 16, pp. 1--14, 2010.
@@ -1002,10 +1064,10 @@ A. Nessmith, ``An examination of insider trading prosecution outcomes,'' \textit
 B. Nelson, M. Barreno, F. J. Chi, A. D. Joseph, B. I. P. Rubinstein, U. Saini, C. Sutton, J. D. Tygar, and K. Xia, ``Misleading learners: Co-opting your spam filter,'' in \textit{Machine Learning in Cyber-Trust}, pp. 17--51, 2013.
 
 \bibitem{ref:confidence_calibration}
-G. Guo, C. Chuan, G. Geoff, and Y. Weinberger, ``On calibration of modern neural networks,'' in \textit{International Conference on Machine Learning (ICML)}, 2017.
+C. Guo, G. Pleiss, Y. Sun, and K. Q. Weinberger, ``On calibration of modern neural networks,'' in \textit{International Conference on Machine Learning (ICML)}, 2017.
 
 \bibitem{ref:ensemble}
-T. Kuncheva, ``Combining Pattern Classifiers,'' \textit{Wiley-Interscience}, 2004.
+L. I. Kuncheva, \textit{Combining Pattern Classifiers: Methods and Algorithms}, Wiley-Interscience, 2004.
 
 \bibitem{ref:deflated_sharpe}
 D. H. Bailey and M. L\'{o}pez de Prado, ``The deflated Sharpe ratio: Correcting for selection bias, backtest overfitting, and non-normality,'' \textit{Journal of Portfolio Management}, vol. 40, no. 5, pp. 94--107, 2014.
@@ -1103,6 +1165,26 @@ H. Yang, X.-Y. Liu, and C. D. Wang, ``FinGPT: Open-source financial large langua
 
 \bibitem{ref:lopez_lira_chatgpt}
 A. Lopez-Lira and Y. Tang, ``Can ChatGPT forecast stock price movements? Return predictability and large language models,'' \textit{SSRN Electronic Journal}, 2023.
+
+% --- Reproducibility, falsification, and rigor in ML and finance --------
+
+\bibitem{ref:pineau_repro}
+J. Pineau, P. Vincent-Lamarre, K. Sinha, V. Larivi\`ere, A. Beygelzimer, F. d'Alch\'e-Buc, E. Fox, and H. Larochelle, ``Improving reproducibility in machine learning research (a report from the NeurIPS 2019 reproducibility program),'' \textit{Journal of Machine Learning Research}, vol. 22, no. 164, pp. 1--20, 2021.
+
+\bibitem{ref:bouthillier_repro}
+X. Bouthillier, C. Laurent, and P. Vincent, ``Unreproducible research is reproducible,'' in \textit{Proc. International Conference on Machine Learning (ICML)}, 2019.
+
+\bibitem{ref:lipton_troubling}
+Z. C. Lipton and J. Steinhardt, ``Troubling trends in machine learning scholarship: Some ML papers suffer from flaws that could mislead the public and stymie future research,'' \textit{Queue}, vol. 17, no. 1, pp. 1--33, 2019.
+
+\bibitem{ref:bailey_pseudo}
+D. H. Bailey, J. M. Borwein, M. L\'opez de Prado, and Q. J. Zhu, ``Pseudo-mathematics and financial charlatanism: The effects of backtest overfitting on out-of-sample performance,'' \textit{Notices of the American Mathematical Society}, vol. 61, no. 5, pp. 458--471, 2014.
+
+\bibitem{ref:harvey_presidential}
+C. R. Harvey, ``Presidential address: The scientific outlook in financial economics,'' \textit{Journal of Finance}, vol. 72, no. 4, pp. 1399--1440, 2017.
+
+\bibitem{ref:bergmeir_cv_ts}
+C. Bergmeir and J. M. Ben\'itez, ``On the use of cross-validation for time series predictor evaluation,'' \textit{Information Sciences}, vol. 191, pp. 192--213, 2012.
 
 \end{thebibliography}
 

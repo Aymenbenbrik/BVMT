@@ -1,0 +1,73 @@
+{
+  "variant": "global_norm",
+  "run_name": "tft_global_norm_full_20260510_104831",
+  "best_val_loss": 0.015526432543992996,
+  "best_ckpt": "/app/results/tft_ablations/models/tft_global_norm_full_20260510_104831_epoch=21_val_loss=0.0155.ckpt",
+  "epochs_trained": 37,
+  "params": 368479,
+  "vsn_patched": 0,
+  "vsn_patched_names": [],
+  "target_normalizer": "TorchNormalizer",
+  "dir_acc_history": [
+    {
+      "epoch": 0,
+      "dir_acc": 49.12
+    },
+    {
+      "epoch": 0,
+      "dir_acc": 47.37
+    },
+    {
+      "epoch": 3,
+      "dir_acc": 52.63
+    },
+    {
+      "epoch": 6,
+      "dir_acc": 47.37
+    },
+    {
+      "epoch": 9,
+      "dir_acc": 54.39
+    },
+    {
+      "epoch": 12,
+      "dir_acc": 43.86
+    },
+    {
+      "epoch": 15,
+      "dir_acc": 45.61
+    },
+    {
+      "epoch": 18,
+      "dir_acc": 45.61
+    },
+    {
+      "epoch": 21,
+      "dir_acc": 50.88
+    },
+    {
+      "epoch": 24,
+      "dir_acc": 45.61
+    },
+    {
+      "epoch": 27,
+      "dir_acc": 47.37
+    },
+    {
+      "epoch": 30,
+      "dir_acc": 47.37
+    },
+    {
+      "epoch": 33,
+      "dir_acc": 47.37
+    },
+    {
+      "epoch": 36,
+      "dir_acc": 47.37
+    }
+  ],
+  "best_q50_dir_acc": 54.39,
+  "elapsed_seconds": 9648.3,
+  "seed": 0,
+  "smoke": false
+}

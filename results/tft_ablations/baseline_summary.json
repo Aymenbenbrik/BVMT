@@ -1,8 +1,8 @@
 {
   "variant": "baseline",
-  "run_name": "tft_baseline_smoke_20260509_234154",
+  "run_name": "tft_baseline_smoke_20260510_113220",
   "best_val_loss": 0.013354905880987644,
-  "best_ckpt": "C:\\Users\\aymen\\OneDrive\\Bureau\\recherche\\IEEE\\bvmt-project-main\\bvmt-project-main\\results\\tft_ablations\\models\\tft_baseline_smoke_20260509_234154_epoch=00_val_loss=0.0134.ckpt",
+  "best_ckpt": "C:\\Users\\aymen\\OneDrive\\Bureau\\recherche\\IEEE\\bvmt-project-main\\bvmt-project-main\\results\\tft_ablations\\models\\tft_baseline_smoke_20260510_113220_epoch=00_val_loss=0.0134.ckpt",
   "epochs_trained": 5,
   "params": 29343,
   "vsn_patched": 0,
@@ -10,7 +10,7 @@
   "target_normalizer": "GroupNormalizer",
   "dir_acc_history": [],
   "best_q50_dir_acc": null,
-  "elapsed_seconds": 9.5,
+  "elapsed_seconds": 12.0,
   "seed": 0,
   "smoke": true
 }
